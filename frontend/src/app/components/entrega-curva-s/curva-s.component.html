@@ -1,0 +1,33 @@
+<div class="p-4">
+    <h2 class="text-2xl font-bold mb-4">Curva S da Sprint</h2>
+  
+    <!-- Gráfico -->
+    <div class="mb-6">
+      <canvas baseChart
+        [data]="chartData"
+        [options]="chartOptions"
+        [type]="'line'">
+      </canvas>
+    </div>
+  
+    <!-- Tabela de dados -->
+    <div class="overflow-auto">
+      <table class="min-w-full border text-sm text-left">
+        <thead class="bg-gray-100 font-semibold">
+          <tr>
+            <th class="border px-4 py-2">Data</th>
+            <th class="border px-4 py-2">% Planejado</th>
+            <th class="border px-4 py-2">% Realizado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of tabelaDatas; let i = index">
+            <td class="border px-4 py-2">{{ data }}</td>
+            <td class="border px-4 py-2">{{ tabelaPlanejado[i] | number: '1.0-0' }}%</td>
+            <td class="border px-4 py-2">{{ tabelaRealizado[i] | number: '1.0-0' }}%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  

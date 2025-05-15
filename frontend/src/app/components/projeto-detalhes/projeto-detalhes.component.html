@@ -1,0 +1,131 @@
+<div class="p-4 max-w-4xl mx-auto">
+  <h2 class="text-2xl font-bold mb-4">{{ projeto?.nome }}</h2>
+  <p class="mb-2"><strong>Descrição:</strong> {{ projeto?.descricao }}</p>
+  <p class="mb-2"><strong>Data de Início:</strong> {{ projeto?.dataInicio | date }}</p>
+  <p class="mb-4"><strong>Data de Fim:</strong> {{ projeto?.dataFim | date }}</p>
+
+  <button
+      class="mb-4 bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded"
+      (click)="voltarParaEmpresa()">
+      ⬅️ Voltar para Empresa
+  </button>
+
+  <!-- BOTÕES ADM -->
+  <div *ngIf="tipoUsuario === 'adm'" class="mb-4 flex gap-4">
+    <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded" (click)="modoEdicao = true">
+      ✏️ Editar Projeto
+    </button>
+    <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" (click)="confirmarExclusaoProjeto()">
+      🗑️ Excluir Projeto
+    </button>
+  </div>
+
+  <!-- FORMULÁRIO DE EDIÇÃO DO PROJETO   -->
+
+  <div *ngIf="modoEdicao" class="mb-6 border p-4 bg-gray-50 rounded">
+    <h3 class="text-xl font-semibold mb-4">Editar Projeto</h3>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <mat-form-field appearance="fill">
+        <mat-label>Nome</mat-label>
+        <input matInput [(ngModel)]="formEdicao.nome" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Descrição</mat-label>
+        <input matInput [(ngModel)]="formEdicao.descricao" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Data de Início</mat-label>
+        <input matInput [matDatepicker]="inicioPicker" [(ngModel)]="formEdicao.dataInicio" />
+        <mat-datepicker-toggle matSuffix [for]="inicioPicker"></mat-datepicker-toggle>
+        <mat-datepicker #inicioPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Data de Fim</mat-label>
+        <input matInput [matDatepicker]="fimPicker" [(ngModel)]="formEdicao.dataFim" />
+        <mat-datepicker-toggle matSuffix [for]="fimPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fimPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="md:col-span-2">
+        <mat-label>Usuários no Projeto</mat-label>
+        <mat-select [(ngModel)]="formEdicao.usuariosSelecionados" multiple>
+          <mat-option *ngFor="let u of projeto?.todosUsuarios" [value]="u._id">
+            {{ u.nome }} ({{ u.email }})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>      
+    </div>
+
+    <div class="mt-4 flex gap-2">
+      <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" (click)="salvarEdicaoProjeto()">
+        Salvar Alterações
+      </button>
+      <button class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded" (click)="modoEdicao = false">
+        Cancelar
+      </button>
+    </div>
+  </div>
+ 
+  <!-- FORMULÁRIO DE CRIAÇÃO DE SPRINT (ADM) -->
+  <div *ngIf="tipoUsuario === 'adm'" class="mb-8 p-4 border rounded bg-white">
+    <h3 class="text-xl font-semibold mb-4">Criar Sprint</h3>
+
+    <div *ngIf="erro" class="text-red-600 mb-2">{{ erro }}</div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <mat-form-field appearance="fill">
+        <mat-label>Nome da Sprint</mat-label>
+        <input matInput [(ngModel)]="nomeSprint" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Data de Início</mat-label>
+        <input matInput [matDatepicker]="inicioSprintPicker" [(ngModel)]="dataInicioSprint" />
+        <mat-datepicker-toggle matSuffix [for]="inicioSprintPicker"></mat-datepicker-toggle>
+        <mat-datepicker #inicioSprintPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <button
+      class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+      (click)="criarSprint()">
+      Criar Sprint
+    </button>
+  </div>
+
+  <!-- LISTA DE SPRINTS -->
+  <div *ngIf="sprints.length === 0" class="text-gray-600">
+    Nenhuma sprint cadastrada para este projeto.
+  </div>
+
+  <div *ngFor="let sprint of sprints" class="mt-6 border rounded p-4 bg-gray-50">
+    <h3 class="text-lg font-semibold">{{ sprint.nome }}</h3>
+    <p><strong>Data de Início:</strong> {{ sprint.dataInicio | date }}</p>
+    <p><strong>Data de Fim:</strong> {{ sprint.dataFim | date }}</p>
+    <p><strong>Status:</strong>
+      <span [ngClass]="{
+        'text-blue-600': definirStatusSprint(sprint) === 'Planejado',
+        'text-yellow-600': definirStatusSprint(sprint) === 'Em Andamento',
+        'text-green-600': definirStatusSprint(sprint) === 'Concluído',
+        'text-red-600': definirStatusSprint(sprint) === 'Atrasado'
+      }">
+        {{ definirStatusSprint(sprint) }}
+      </span>
+    </p>
+
+    <div class="mt-2">
+      <a class="text-blue-600 hover:underline" [routerLink]="['/sprint', sprint._id]">
+        ➡️ Ver Detalhes da Sprint
+      </a>
+    </div>
+  </div>
+
+  <!-- CALENDÁRIO DE SPRINTS -->
+  <div *ngIf="projeto?.sprints?.length > 0" class="mt-10">
+    <app-sprint-calendar [sprints]="sprints"></app-sprint-calendar>
+  </div>
+</div>

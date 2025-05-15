@@ -1,0 +1,25 @@
+<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
+    <h2 class="text-xl font-bold mb-4">Cadastro de Administrador</h2>
+  
+    <div *ngIf="erro" class="text-red-600 mb-2">{{ erro }}</div>
+  
+    <form (ngSubmit)="cadastrar()">
+      <mat-form-field appearance="fill" class="w-full mb-4">
+        <mat-label>Nome</mat-label>
+        <input matInput [(ngModel)]="nome" name="nome" required />
+      </mat-form-field>
+  
+      <mat-form-field appearance="fill" class="w-full mb-4">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" [(ngModel)]="email" name="email" required />
+      </mat-form-field>
+  
+      <mat-form-field appearance="fill" class="w-full mb-4">
+        <mat-label>Senha</mat-label>
+        <input matInput type="password" [(ngModel)]="senha" name="senha" required />
+      </mat-form-field>
+  
+      <button mat-raised-button color="primary" class="w-full">Cadastrar</button>
+    </form>
+  </div>
+  

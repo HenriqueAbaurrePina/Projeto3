@@ -1,0 +1,68 @@
+<div class="p-4 max-w-xl mx-auto">
+  <h2 class="text-2xl font-bold mb-4">Criar Projeto</h2>
+
+  <mat-form-field appearance="fill" class="w-full mb-4">
+    <mat-label>Nome do Projeto</mat-label>
+    <input matInput [(ngModel)]="nome" name="nome" required />
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="w-full mb-4">
+    <mat-label>Descrição</mat-label>
+    <textarea matInput [(ngModel)]="descricao" name="descricao" rows="3"></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="w-full mb-4">
+    <mat-label>Data de Início</mat-label>
+    <input
+      matInput
+      [matDatepicker]="pickerInicio"
+      [(ngModel)]="dataInicio"
+      name="dataInicio"
+      required
+    />
+    <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+    <mat-datepicker #pickerInicio></mat-datepicker>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="w-full mb-4">
+    <mat-label>Data de Fim</mat-label>
+    <input
+      matInput
+      [matDatepicker]="pickerFim"
+      [(ngModel)]="dataFim"
+      name="dataFim"
+      required
+    />
+    <mat-datepicker-toggle matSuffix [for]="pickerFim"></mat-datepicker-toggle>
+    <mat-datepicker #pickerFim></mat-datepicker>
+  </mat-form-field>
+
+  <div class="mb-4">
+    <h3 class="text-lg font-semibold mb-2">Usuários filhos que terão acesso:</h3>
+    <div *ngFor="let u of usuarios" class="flex items-center gap-2 mb-1">
+      <mat-checkbox (change)="toggleUsuario(u._id, $event.checked)">
+        {{ u.nome }}<span class="text-gray-500 text-sm">({{ u.email }})</span>
+      </mat-checkbox>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-2 mt-4">
+    <button
+      mat-raised-button
+      color="primary"
+      class="w-full"
+      (click)="criarProjeto()"
+    >
+      Criar Projeto
+    </button>
+
+    <button
+      mat-raised-button
+      color="warn"
+      class="w-full"
+      (click)="cancelar()"
+    >
+      Cancelar
+    </button>
+  </div>
+</div>

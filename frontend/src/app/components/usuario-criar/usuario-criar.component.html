@@ -1,0 +1,41 @@
+<div class="p-4 max-w-xl mx-auto">
+    <h2 class="text-2xl font-bold mb-4">Criar Usuário Filho</h2>
+  
+    <mat-form-field appearance="fill" class="w-full mb-4">
+      <mat-label>Nome</mat-label>
+      <input matInput [(ngModel)]="nome" name="nome" required />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill" class="w-full mb-4">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" [(ngModel)]="email" name="email" required />
+    </mat-form-field>
+  
+    <mat-form-field appearance="fill" class="w-full mb-4">
+      <mat-label>Senha</mat-label>
+      <input matInput type="password" [(ngModel)]="senha" name="senha" required />
+    </mat-form-field>
+  
+    <div *ngIf="projetos.length > 0" class="mb-4">
+      <h3 class="text-lg font-semibold mb-2">Selecionar Projetos:</h3>
+      <div *ngFor="let projeto of projetos" class="flex items-center gap-2 mb-1">
+        <mat-checkbox (change)="toggleProjeto(projeto._id, $event.checked)">
+          {{ projeto.nome }} - <span class="text-sm text-gray-500">{{ projeto.descricao }}</span>
+        </mat-checkbox>
+      </div>
+    </div>
+  
+    <div *ngIf="erro" class="text-red-600 mb-4 font-medium">
+      {{ erro }}
+    </div>
+  
+    <div class="grid grid-cols-2 gap-2 mt-2">
+      <button mat-raised-button color="primary" class="w-full" (click)="criarUsuario()">
+        Criar
+      </button>
+      <button mat-raised-button color="warn" class="w-full" (click)="cancelar()">
+        Cancelar
+      </button>
+    </div>
+  </div>
+  

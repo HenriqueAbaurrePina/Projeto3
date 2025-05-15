@@ -1,0 +1,79 @@
+<div class="p-4">
+  <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+  
+  <div class="flex justify-end mb-4">
+    <button
+      class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+      (click)="sair()"
+    >
+      Sair
+    </button>
+  </div>
+
+  <!-- Botão apenas para ADM -->
+  <ng-container *ngIf="tipoUsuario === 'adm'">
+    <button
+      class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-2"
+      (click)="criarEmpresa()"
+    >
+      Criar Empresa
+    </button>
+  </ng-container>
+
+  <!-- Quando não há empresas -->
+  <div *ngIf="empresas.length === 0">Nenhuma empresa encontrada.</div>
+
+  <!-- Lista de empresas para ADM -->
+  <div *ngIf="tipoUsuario === 'adm'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div *ngFor="let empresa of empresas" class="bg-white p-4 rounded shadow">
+      <h2 class="text-xl font-semibold">{{ empresa.nome }}</h2>
+      <button
+      class="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+      (click)="verEmpresa(empresa._id)"
+      >
+      Ver Empresa
+    </button>
+    <button
+      *ngIf="tipoUsuario === 'adm'"
+      class="mt-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded mb-6 ml-2"
+      (click)="abrirConfirmacaoExclusao(empresa)"
+    >
+      Excluir Empresa
+    </button>
+  </div>
+  </div>
+
+  <div *ngIf="mostrarConfirmacaoExclusao" class="mt-6 p-4 border bg-red-50 rounded">
+    <h2 class="text-lg font-bold mb-2">⚠️ Confirmar Exclusão da Empresa "{{ empresaParaExcluir?.nome }}"</h2>
+    <div *ngIf="erroExclusao" class="text-red-600 mb-2">{{ erroExclusao }}</div>
+    
+    <label class="block mb-2">
+      Email:
+      <input [(ngModel)]="emailConfirmacao" class="border p-2 w-full rounded" type="email">
+    </label>
+    <label class="block mb-2">
+      Senha:
+      <input [(ngModel)]="senhaConfirmacao" class="border p-2 w-full rounded" type="password">
+    </label>
+  
+    <div class="flex gap-2 mt-3">
+      <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" (click)="confirmarExclusaoEmpresa()">Confirmar Exclusão</button>
+      <button class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded" (click)="cancelarExclusao()">Cancelar</button>
+    </div>
+  </div>
+  
+  <!-- Exibição única para FILHO -->
+  <div *ngIf="tipoUsuario === 'filho' && empresas.length > 0" class="bg-white p-4 rounded shadow">
+    <h2 class="text-xl font-semibold">{{ empresas[0].nome }}</h2>
+    <button
+      class="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+      (click)="verEmpresa(empresas[0]._id)"
+    >
+      Ver Empresa
+    </button>
+  </div>
+
+  <div *ngIf="tipoUsuario === 'filho' && empresas.length === 0" class="text-gray-600 mt-4">
+    Você ainda não está vinculado a nenhuma empresa.
+  </div>
+</div>

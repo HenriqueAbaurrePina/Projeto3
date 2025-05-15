@@ -1,0 +1,99 @@
+<div class="p-4">
+  <h1 class="text-2xl font-bold mb-4">{{ empresa?.nome }}</h1>
+
+  <button
+      class="mb-4 bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded"
+      (click)="voltar()">
+      ⬅️ Voltar para Dashboard
+  </button>
+  
+  <div *ngIf="tipoUsuario === 'adm'" class="mt-6">
+    <!-- Botão visível apenas para administradores -->
+    <button
+      class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-6"
+      (click)="criarProjeto()"
+    >
+      Criar Projeto
+    </button>
+
+    <button
+      class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded mb-6 ml-2"
+      (click)="criarUsuarioFilho()"
+    >
+      Criar Usuário Filho
+    </button>
+
+    <!-- Botão para ativar modo de exclusão -->
+    <button
+      *ngIf="!modoExclusaoUsuario"
+      class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mb-6 ml-2"
+      (click)="iniciarExclusaoUsuario()"
+    >
+      🧹 Excluir Usuário Filho
+    </button>
+
+    <!-- Formulário de exclusão -->
+    <div *ngIf="modoExclusaoUsuario" class="mt-4 p-4 bg-red-100 rounded shadow">
+      <h3 class="text-lg font-semibold mb-2">Excluir Usuário Filho</h3>
+
+      <label for="usuarioSelecionado" class="block mb-2 font-medium text-gray-800">Selecione o usuário:</label>
+      <select
+        id="usuarioSelecionado"
+        [(ngModel)]="usuarioSelecionadoParaExclusao"
+        class="w-full p-2 border rounded mb-4"
+      >
+        <option [value]="null" disabled selected>-- Selecione --</option>
+        <option *ngFor="let u of empresa.usuariosFilhos" [value]="u._id">
+          {{ u.nome }} ({{ u.email }})
+        </option>
+      </select>
+
+      <div class="flex gap-3">
+        <button
+          class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+          (click)="confirmarExclusaoUsuario()"
+        >
+          Confirmar Exclusão
+        </button>
+        <button
+          class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
+          (click)="cancelarExclusaoUsuario()"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <div *ngIf="projetos.length === 0" class="text-gray-600">
+    Nenhum projeto cadastrado.
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div *ngFor="let projeto of projetos" class="bg-white p-4 rounded shadow">
+      <h2 class="text-xl font-semibold">{{ projeto.nome }}</h2>
+      <p class="text-gray-700">{{ projeto.descricao }}</p>
+      <p><strong>Status:</strong>
+        <span [ngClass]="{
+          'text-blue-600': definirStatusProjeto(projeto) === 'Planejado',
+          'text-yellow-600': definirStatusProjeto(projeto) === 'Em Andamento',
+          'text-green-600': definirStatusProjeto(projeto) === 'Concluído',
+          'text-red-600': definirStatusProjeto(projeto) === 'Atrasado'
+        }">
+          {{ definirStatusProjeto(projeto) }}
+        </span>
+      </p>
+      <p class="text-sm"><strong>Início:</strong> {{ projeto.dataInicio | date }}</p>
+      <p class="text-sm"><strong>Fim:</strong> {{ projeto.dataFim | date }}</p>
+  
+      <button
+        class="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+        (click)="verProjeto(projeto._id)"
+      >
+        Ver Projeto
+      </button>
+    </div>
+  </div>  
+
+</div>
