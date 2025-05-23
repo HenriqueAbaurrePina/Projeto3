@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build -- --configuration=development
+RUN npm run build -- --configuration=production
 
 # Etapa 2: usar Nginx para servir os arquivos
 FROM nginx:alpine
