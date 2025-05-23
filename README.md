@@ -147,9 +147,3 @@ O backend utiliza autenticação com tokens JWT. As rotas protegidas exigem envi
 3. **Registro** (`POST /register`)
 
    * Admins podem registrar outros usuários `filho`.
-
----
-
----
-
-Para dúvidas, abra uma issue ou entre em contato com os colaboradores do repositório.
