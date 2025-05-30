@@ -41,7 +41,8 @@ export class AuthInterceptor implements HttpInterceptor {
         if (
           error.status === 401 &&
           !req.url.includes('/auth/login') &&
-          !req.url.includes('/auth/refresh')
+          !req.url.includes('/auth/refresh') &&
+          !req.url.includes('/auth/logout')
         ) {
           // Verificação extra de token válido
           if (!authService.getToken()) {
