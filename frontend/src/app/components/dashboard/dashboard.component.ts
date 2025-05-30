@@ -32,7 +32,10 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     const token = this.auth.getToken();
-    if (!token) return;
+    if (!token) {
+      this.router.navigate(['/login']);
+      return;
+    }
   
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
   

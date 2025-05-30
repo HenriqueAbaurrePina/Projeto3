@@ -40,10 +40,10 @@ export class AuthService {
   
     this.http.post(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true }).subscribe({
       next: () => {
-        this.router.navigate(['/login']);
+        setTimeout(() => this.router.navigate(['/login']), 0);
       },
       error: () => {
-        this.router.navigate(['/login']); // mesmo em erro, redireciona
+        setTimeout(() => this.router.navigate(['/login']), 0); // mesmo em erro, redireciona
       }
     });
   } 
