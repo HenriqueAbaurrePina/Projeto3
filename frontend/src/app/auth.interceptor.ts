@@ -6,6 +6,7 @@ import {
   HttpEvent,
   HttpErrorResponse
 } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, catchError, from, switchMap, throwError } from 'rxjs';
 import { AuthService } from './services/auth.service';
 
@@ -62,6 +63,7 @@ export class AuthInterceptor implements HttpInterceptor {
               .catch(err => {
                 this.isRefreshing = false;
                 this.injector.get(AuthService).logout(); // Força logout em erro
+                this.injector.get(Router).navigate(['/login']);
                 throw err;
               });
           }
