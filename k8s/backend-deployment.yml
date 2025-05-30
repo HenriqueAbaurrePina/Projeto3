@@ -2,6 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
+  labels:
+    app: backend
+    tier: backend
 spec:
   replicas: 1
   selector:
@@ -11,13 +14,20 @@ spec:
     metadata:
       labels:
         app: backend
+        tier: backend
     spec:
       containers:
         - name: backend
           image: henriquepina/proj3-backend:latest
           ports:
             - containerPort: 3000
-          env:
-            - name: MONGO_URI
-              value: mongodb://mongo:27017/gestao-projetos
-              #value: mongodb://10.99.20.157:27017/gestao-projetos
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secrets
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000

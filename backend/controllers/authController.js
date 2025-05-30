@@ -1,8 +1,10 @@
 const Usuario = require('../models/Usuario');
 const Projeto = require('../models/Projeto');
 const Empresa = require('../models/Empresa');
+const RefreshToken = require('../models/RefreshToken');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const login = async (req, res) => {
   const { email, senha } = req.body;
@@ -25,8 +27,35 @@ const login = async (req, res) => {
       empresaId: usuario.empresaId || null
     };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '2h' });
-    res.json({ token });
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
+    const refreshTokenRaw = crypto.randomBytes(64).toString('hex');
+    const refreshTokenHash = crypto.createHash('sha256').update(refreshTokenRaw).digest('hex');
+
+    // Limita o número de refresh tokens ativos por usuário (máx 2)
+    const tokensAtuais = await RefreshToken.find({ userId: usuario._id }).sort({ createdAt: 1 });
+    if (tokensAtuais.length >= 2) {
+      const tokensParaRemover = tokensAtuais.slice(0, tokensAtuais.length - 1);
+      const idsParaRemover = tokensParaRemover.map(t => t._id);
+      await RefreshToken.deleteMany({ _id: { $in: idsParaRemover } });
+    }
+
+    await RefreshToken.create({
+      userId: usuario._id,
+      token: refreshTokenHash,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+
+    // Envia refreshToken como cookie HTTPOnly seguro
+    res.cookie('refreshToken', refreshTokenRaw, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    res.json({ accessToken });
 
   } catch (error) {
     console.error(error);

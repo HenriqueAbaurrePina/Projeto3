@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-specific-traffic
+  namespace: default  # ajuste se estiver usando outro namespace
+spec:
+  podSelector: {}  # aplica a todos os pods
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector: { matchLabels: { app: frontend } }
+      ports:
+        - protocol: TCP
+          port: 3000  # porta do backend
+    - from:
+        - namespaceSelector: {}  # permite acesso do próprio namespace (opcional)
+  egress:
+    - to:
+        - podSelector: { matchLabels: { app: mongo } }
+      ports:
+        - protocol: TCP
+          port: 27017  # porta do MongoDB
+    - to:
+        - podSelector: { matchLabels: { app: backup-trigger } }
+      ports:
+        - protocol: TCP
+          port: 80  # ou ajuste se backup-trigger estiver exposto em outra porta

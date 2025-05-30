@@ -6,15 +6,17 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    restart: unless-stopped
   backend:
     build: ./backend
     container_name: backend
     depends_on:
       - mongo
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/gestao-projetos
+    env_file:
+      - backend/.env
     expose:
       - "3000"
+    restart: unless-stopped
   frontend:
     build: ./frontend
     container_name: frontend
@@ -22,6 +24,7 @@ services:
       - "4200:80"
     depends_on:
       - backend
+    restart: unless-stopped
       
 volumes:
   mongo_data:

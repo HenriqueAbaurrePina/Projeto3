@@ -114,9 +114,4 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  sair() {
-    localStorage.removeItem('token');
-    this.router.navigate(['/login']);
-  }
-
 }

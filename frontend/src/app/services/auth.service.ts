@@ -6,12 +6,12 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private baseUrl = `${environment.apiUrl}`;
-  private tokenKey = 'token';
+  private tokenKey = 'accessToken';
 
   constructor(private http: HttpClient, private router: Router) {}
 
   login(email: string, senha: string) {
-    return this.http.post<{ token: string }>(`${this.baseUrl}/auth/login`, { email, senha });
+    return this.http.post<{ accessToken: string; refreshToken: string }>(`${this.baseUrl}/auth/login`, { email, senha }, { withCredentials: true });
   }
 
   setToken(token: string) {
@@ -23,12 +23,28 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    if (!token) return false;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp > now;
+    } catch (e) {
+      return false;
+    }
   }
 
   logout() {
     localStorage.removeItem(this.tokenKey);
-    this.router.navigate(['/login']);
+  
+    this.http.post(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true }).subscribe(() => {
+      this.router.navigate(['/login']);
+    });
+  }  
+
+  refreshToken() {
+    return this.http.post<{ accessToken: string }>(`${this.baseUrl}/auth/refresh`,{},{ withCredentials: true });
   }
 
   getEmpresaDoUsuario() {

@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build -- --configuration=production
 
 # Etapa 2: usar Nginx para servir os arquivos
-FROM nginx:alpine
+FROM nginx:1.25.3-alpine
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist/frontend-app/browser /usr/share/nginx/html
