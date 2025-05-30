@@ -36,6 +36,7 @@ export class AuthService {
   }
 
   logout() {  
+    console.log('Logout chamado');
     this.http.post(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true }).subscribe({
       next: () => {
         setTimeout(() => this.router.navigate(['/login']), 0);
