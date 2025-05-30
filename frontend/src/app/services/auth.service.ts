@@ -35,15 +35,15 @@ export class AuthService {
     }
   }
 
-  logout() {
-    localStorage.removeItem(this.tokenKey);
-  
+  logout() {  
     this.http.post(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true }).subscribe({
       next: () => {
         setTimeout(() => this.router.navigate(['/login']), 0);
+        localStorage.removeItem(this.tokenKey);
       },
       error: () => {
         setTimeout(() => this.router.navigate(['/login']), 0); // mesmo em erro, redireciona
+        localStorage.removeItem(this.tokenKey);
       }
     });
   } 
