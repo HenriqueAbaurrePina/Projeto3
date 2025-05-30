@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import {
   HttpInterceptor,
   HttpRequest,
@@ -8,7 +8,6 @@ import {
 } from '@angular/common/http';
 import { Observable, catchError, from, switchMap, throwError } from 'rxjs';
 import { AuthService } from './services/auth.service';
-import { Injector } from '@angular/core';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -20,6 +19,11 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const authService = this.injector.get(AuthService);
     const token = authService.getToken();
+
+    // Bloqueia tentativa de refresh se não há token algum (ex: após logout)
+    if (!token && req.url.includes('/auth/refresh')) {
+      return throwError(() => new Error('Tentativa de refresh após logout'));
+    }
 
     let authReq = req;
     if (token) {
@@ -38,6 +42,11 @@ export class AuthInterceptor implements HttpInterceptor {
           !req.url.includes('/auth/login') &&
           !req.url.includes('/auth/refresh')
         ) {
+          // Verificação extra de token válido
+          if (!authService.getToken()) {
+            return throwError(() => new Error('Token ausente. Ignorando refresh.'));
+          }
+
           if (!this.isRefreshing) {
             this.isRefreshing = true;
 
@@ -52,7 +61,7 @@ export class AuthInterceptor implements HttpInterceptor {
               })
               .catch(err => {
                 this.isRefreshing = false;
-                authService.logout(); // Opcional: força logout se o refresh falhar
+                this.injector.get(AuthService).logout(); // Força logout em erro
                 throw err;
               });
           }
