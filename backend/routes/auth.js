@@ -116,7 +116,12 @@ router.post('/logout', async (req, res) => {
   try {
     const refreshTokenHash = crypto.createHash('sha256').update(refreshTokenRaw).digest('hex');
     await RefreshToken.deleteOne({ token: refreshTokenHash });
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      path: '/',
+    });
     res.status(200).json({ mensagem: 'Logout realizado com sucesso' });
   } catch (err) {
     console.error(err);
