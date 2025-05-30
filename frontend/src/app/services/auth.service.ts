@@ -38,10 +38,15 @@ export class AuthService {
   logout() {
     localStorage.removeItem(this.tokenKey);
   
-    this.http.post(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true }).subscribe(() => {
-      this.router.navigate(['/login']);
+    this.http.post(`${this.baseUrl}/auth/logout`, {}, { withCredentials: true }).subscribe({
+      next: () => {
+        this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.router.navigate(['/login']); // mesmo em erro, redireciona
+      }
     });
-  }  
+  } 
 
   refreshToken() {
     return this.http.post<{ accessToken: string }>(`${this.baseUrl}/auth/refresh`,{},{ withCredentials: true });
