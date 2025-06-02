@@ -50,7 +50,7 @@ const login = async (req, res) => {
     // Envia refreshToken como cookie HTTPOnly seguro
     res.cookie('refreshToken', refreshTokenRaw, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
       sameSite: 'Strict',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
