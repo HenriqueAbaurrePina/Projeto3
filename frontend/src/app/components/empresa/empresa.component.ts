@@ -27,49 +27,42 @@ export class EmpresaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    if (token) {
-      const payloadBase64 = token.split('.')[1];
-      try {
-        const payload = JSON.parse(atob(payloadBase64));
-        this.tipoUsuario = payload.tipo;
-
+    this.http.get(`${environment.apiUrl}/auth/usuario-logado`, { withCredentials: true }).subscribe({
+      next: (usuario: any) => {
+        this.tipoUsuario = usuario.tipo;
+  
         if (this.tipoUsuario === 'adm') {
           this.empresaId = this.route.snapshot.paramMap.get('id')!;
-          this.http.get(`${environment.apiUrl}/empresa/${this.empresaId}`, { headers }).subscribe({
+          this.http.get(`${environment.apiUrl}/empresa/${this.empresaId}`).subscribe({
             next: (res: any) => {
               this.empresa = res;
               this.projetos = res.projetos || [];
             },
             error: err => {
               console.error('Erro ao buscar empresa (ADM):', err);
-              if (err.status === 403 || err.status === 404) {
-                this.router.navigate(['/erro']);
-              }
+              this.router.navigate(['/erro']);
             }
           });
         } else {
-          this.http.get(`${environment.apiUrl}/empresa`, { headers }).subscribe({
+          this.http.get(`${environment.apiUrl}/empresa`).subscribe({
             next: (res: any) => {
               this.empresa = res;
               this.projetos = res.projetos || [];
-              this.empresaId = res._id; // necessário para redirecionar ao criar projeto
+              this.empresaId = res._id;
             },
             error: err => {
               console.error('Erro ao buscar empresa (filho):', err);
-              if (err.status === 403 || err.status === 404) {
-                this.router.navigate(['/erro']);
-              }
+              this.router.navigate(['/erro']);
             }
           });
         }
-      } catch (e) {
-        console.error('Erro ao decodificar token:', e);
+      },
+      error: err => {
+        console.error('Erro ao obter usuário logado:', err);
+        this.router.navigate(['/login']);
       }
-    }
-  }
+    });
+  }  
 
   definirStatusProjeto(projeto: any): string {
     const sprints = projeto.sprints || [];
