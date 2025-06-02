@@ -97,8 +97,7 @@ router.post('/refresh', async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/'
+      maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     const newAccessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });

@@ -4,12 +4,6 @@ metadata:
   name: frontend-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/enable-cookies: "true"
-    nginx.ingress.kubernetes.io/proxy-cookie-path: / "/"
-    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_clear_headers "Set-Cookie";
-      more_set_headers "Set-Cookie: refreshToken=$cookie_refreshToken; Path=/; HttpOnly; Secure; SameSite=Strict";
 spec:
   rules:
     - host: frontend.local
