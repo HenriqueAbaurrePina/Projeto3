@@ -123,8 +123,11 @@ export class EmpresaComponent implements OnInit {
     const confirmar = confirm('Tem certeza que deseja excluir este usuário? Essa ação não poderá ser desfeita.');
     if (!confirmar) return;
   
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    const headers = new HttpHeaders();  // sem token
+    this.http.delete(`${environment.apiUrl}/empresa/${this.empresaId}/usuarios/${this.usuarioSelecionadoParaExclusao}`, {
+      headers,
+      withCredentials: true
+    })
   
     this.http.delete(`${environment.apiUrl}/empresa/${this.empresaId}/usuarios/${this.usuarioSelecionadoParaExclusao}`, { headers })
       .subscribe({
