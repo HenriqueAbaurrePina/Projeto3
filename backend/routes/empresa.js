@@ -28,6 +28,25 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
+router.get('/do-usuario', verifyToken, async (req, res) => {
+  try {
+    const usuario = await Usuario.findById(req.usuario.id);
+    console.log('[DEBUG] Usuario retornado:', usuario);
+    if (!usuario || !usuario.empresaId || usuario.empresaId.length === 0) {
+      return res.status(404).json({ mensagem: 'Usuário sem empresas vinculadas.' });
+    }
+    console.log('[DEBUG] empresaId:', usuario.empresaId);
+
+
+    const empresas = await Empresa.find({ _id: { $in: usuario.empresaId } });
+    console.log('[DEBUG] Empresas encontradas:', empresas);
+    res.json(empresas);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ mensagem: 'Erro ao buscar empresa do usuário.' });
+  }
+});
+
 // Listar empresa do usuário
 router.get('/', verifyToken, async (req, res) => {
   try {
@@ -82,10 +101,17 @@ router.get('/:id', verifyToken, async (req, res) => {
       .populate('usuariosFilhos')
       .populate('projetos');
 
+      console.log('[DEBUG] Empresa retornada:', empresa);
+
     if (!empresa) return res.status(404).json({ mensagem: 'Empresa não encontrada.' });
 
+    console.log('[DEBUG] Usuario logado:', req.usuario);
+
     const isAdm = req.usuario.tipo === 'adm' && empresa.admId.toString() === req.usuario.id;
+    console.log('[DEBUG] empresa.usuariosFilhos:', empresa.usuariosFilhos);
     const isVinculado = req.usuario.tipo === 'filho' && empresa.usuariosFilhos.some(u => u._id.toString() === req.usuario.id);
+
+    console.log(`[DEBUG] isAdm: ${isAdm}, isVinculado: ${isVinculado}`);
 
     if (!isAdm && !isVinculado) {
       return res.status(404).json({ mensagem: 'Empresa não encontrada.' });
@@ -93,6 +119,7 @@ router.get('/:id', verifyToken, async (req, res) => {
 
     res.json(empresa);
   } catch (err) {
+    console.error('[ERRO real ao buscar empresa por ID]', err);
     res.status(500).json({ mensagem: 'Erro ao buscar empresa por ID.' });
   }
 });

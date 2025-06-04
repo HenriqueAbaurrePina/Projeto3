@@ -54,14 +54,23 @@ export class ProjetoDetalhesComponent implements OnInit {
   constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
-    this.projetoId = this.route.snapshot.paramMap.get('id')!; 
-    const token = localStorage.getItem('token');
-    if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      this.tipoUsuario = payload.tipo;
-      this.usuarioId = payload.id;
-    }
-
+    this.projetoId = this.route.snapshot.paramMap.get('id')!;
+  
+    this.http.get(`${environment.apiUrl}/auth/usuario-logado`, { withCredentials: true }).subscribe({
+      next: (usuario: any) => {
+        this.tipoUsuario = usuario.tipo;
+        this.usuarioId = usuario._id;
+  
+        this.carregarDadosProjeto(); // chama a função que já existe para carregar o restante
+      },
+      error: err => {
+        console.error('Erro ao buscar usuário logado:', err);
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+  
+  carregarDadosProjeto() {
     this.http.get(`${environment.apiUrl}/projetos/${this.projetoId}`).subscribe({
       next: res => {
         this.projeto = res;
@@ -74,12 +83,14 @@ export class ProjetoDetalhesComponent implements OnInit {
         };
         const empresaId = typeof this.projeto.empresaId === 'object'
           ? this.projeto.empresaId._id
-          : this.projeto.empresaId; 
+          : this.projeto.empresaId;
         if (!empresaId) return;
+  
         this.http.get<any[]>(`${environment.apiUrl}/empresa/${empresaId}/usuarios`).subscribe({
           next: usuarios => this.projeto.todosUsuarios = usuarios,
           error: err => console.error('Erro ao carregar usuários da empresa:', err)
         });
+  
         this.http.get<any[]>(`${environment.apiUrl}/sprints?projetoId=${this.projetoId}`).subscribe({
           next: sprints => {
             this.sprints = sprints;
@@ -93,7 +104,7 @@ export class ProjetoDetalhesComponent implements OnInit {
         else console.error('Erro ao buscar projeto:', err);
       }
     });
-  }
+  }  
 
   criarSprint() {
     if (!this.nomeSprint || !this.dataInicioSprint) {

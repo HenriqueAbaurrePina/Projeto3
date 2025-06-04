@@ -7,7 +7,7 @@ import {
   HttpErrorResponse
 } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, catchError, from, switchMap, throwError } from 'rxjs';
+import { Observable, throwError, from, switchMap, catchError } from 'rxjs';
 import { AuthService } from './services/auth.service';
 
 @Injectable()
@@ -21,22 +21,14 @@ export class AuthInterceptor implements HttpInterceptor {
     console.log('[Interceptor] Rota:', req.url);
 
     const authService = this.injector.get(AuthService);
-    const token = authService.getToken();
+    const token = authService.getAccessToken(); // ← 🔑 Token sempre do AuthService
 
-    // Bloqueia tentativa de refresh se não há token algum (ex: após logout)
-    if (!token && req.url.includes('/auth/refresh')) {
-      return throwError(() => new Error('Tentativa de refresh após logout'));
-    }
-
-    let authReq = req;
-    if (token) {
-      authReq = req.clone({
-        setHeaders: { Authorization: `Bearer ${token}` },
-        withCredentials: true
-      });
-    } else {
-      authReq = req.clone({ withCredentials: true });
-    }
+    const authReq = token
+      ? req.clone({
+          setHeaders: { Authorization: `Bearer ${token}` },
+          withCredentials: true
+        })
+      : req.clone({ withCredentials: true });
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
@@ -46,40 +38,38 @@ export class AuthInterceptor implements HttpInterceptor {
           !req.url.includes('/auth/refresh') &&
           !req.url.includes('/auth/logout')
         ) {
-          // Verificação extra de token válido
-          if (!authService.getToken()) {
-            return throwError(() => new Error('Token ausente. Ignorando refresh.'));
-          }
-
           if (!this.isRefreshing) {
             this.isRefreshing = true;
 
-            this.refreshInProgress = this.injector.get(AuthService).refreshToken().toPromise()
-              .then(res => {
+            this.refreshInProgress = authService
+              .refreshToken()
+              .toPromise()
+              .then((res: any) => {
+                this.isRefreshing = false;
+
                 if (!res?.accessToken) {
                   throw new Error('Access token ausente na resposta de refresh');
                 }
-                this.isRefreshing = false;
-                authService.setToken(res.accessToken);
-                return res.accessToken;
+                authService.setAccessToken(res.accessToken); // ← Salva no serviço
+                return res.accessToken
               })
-              .catch(err => {
+              .catch((err) => {
                 this.isRefreshing = false;
-                this.injector.get(AuthService).logout(); // Força logout em erro
+                authService.logout();
                 this.injector.get(Router).navigate(['/login']);
                 throw err;
               });
           }
 
           return from(this.refreshInProgress!).pipe(
-            switchMap(newToken => {
+            switchMap((newToken) => {
               const retryReq = req.clone({
                 setHeaders: { Authorization: `Bearer ${newToken}` },
                 withCredentials: true
               });
               return next.handle(retryReq);
             }),
-            catchError(err => throwError(() => err))
+            catchError((err) => throwError(() => err))
           );
         }
 

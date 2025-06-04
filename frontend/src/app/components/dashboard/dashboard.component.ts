@@ -31,19 +31,11 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const token = this.auth.getToken();
-    if (!token) {
-      this.router.navigate(['/login']);
-      return;
-    }
-  
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-  
-    this.http.get(`${environment.apiUrl}/auth/usuario-logado`, { headers }).subscribe({
+    this.http.get(`${environment.apiUrl}/auth/usuario-logado`, { withCredentials: true }).subscribe({
       next: (res: any) => {
         this.tipoUsuario = res.tipo;
   
-        this.http.get(`${environment.apiUrl}/empresa`, { headers }).subscribe({
+        this.http.get(`${environment.apiUrl}/empresa`, { withCredentials: true }).subscribe({
           next: (res: any) => {
             if (this.tipoUsuario === 'adm') {
               this.empresas = Array.isArray(res) ? res : [res];
@@ -56,9 +48,10 @@ export class DashboardComponent implements OnInit {
       },
       error: err => {
         console.error('Erro ao buscar tipo do usuário:', err);
+        this.router.navigate(['/login']);
       }
     });
-  }  
+  }    
 
   criarEmpresa() {
     const nome = prompt('Nome da empresa:');
@@ -97,7 +90,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.getToken()}`);
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${this.auth.getAccessToken()}`);
     const body = {
       email: this.emailConfirmacao,
       senha: this.senhaConfirmacao

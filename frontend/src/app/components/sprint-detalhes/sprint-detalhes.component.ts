@@ -59,33 +59,39 @@ export class SprintDetalhesComponent implements OnInit {
 
   ngOnInit(): void {
     this.sprintId = this.route.snapshot.paramMap.get('id')!;
-    const token = localStorage.getItem('token');
   
-    if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      this.tipoUsuario = payload.tipo;
-      this.usuarioId = payload.id;
+    this.http.get(`${environment.apiUrl}/auth/usuario-logado`, { withCredentials: true }).subscribe({
+      next: (usuario: any) => {
+        this.tipoUsuario = usuario.tipo;
+        this.usuarioId = usuario._id;
   
-      this.http.get(`${environment.apiUrl}/sprints/${this.sprintId}`).subscribe({
-        next: (res: any) => {
-          this.sprint = res;
+        this.http.get(`${environment.apiUrl}/sprints/${this.sprintId}`).subscribe({
+          next: (res: any) => {
+            this.sprint = res;
   
-          const usuarioEhFilhoDaSprint = this.sprint.usuarios?.some((u: any) => u._id === this.usuarioId);
-          const usuarioEhAdmDaEmpresa = this.tipoUsuario === 'adm' && payload.empresaId === this.sprint.empresaId;
+            const usuarioEhFilhoDaSprint = this.sprint.usuarios?.some((u: any) => u._id === this.usuarioId);
+            const usuarioEhAdmDaEmpresa =
+              this.tipoUsuario === 'adm' &&
+              (Array.isArray(usuario.empresaId)
+                ? usuario.empresaId.includes(this.sprint.empresaId)
+                : usuario.empresaId === this.sprint.empresaId);
   
-          if (!usuarioEhFilhoDaSprint && !usuarioEhAdmDaEmpresa) {
+            if (!usuarioEhFilhoDaSprint && !usuarioEhAdmDaEmpresa) {
+              this.router.navigate(['/erro']);
+            }
+          },
+          error: err => {
+            console.error('Erro ao buscar sprint:', err);
             this.router.navigate(['/erro']);
           }
-        },
-        error: err => {
-          console.error('Erro ao buscar sprint:', err);
-          this.router.navigate(['/erro']);
-        }
-      });
-    } else {
-      this.router.navigate(['/erro']);
-    }
-  }  
+        });
+      },
+      error: err => {
+        console.error('Erro ao buscar usuário logado:', err);
+        this.router.navigate(['/login']);
+      }
+    });
+  }    
 
   criarEntrega() {
     if (!this.titulo || !this.usuarioSelecionado || !this.dataPrevista) {

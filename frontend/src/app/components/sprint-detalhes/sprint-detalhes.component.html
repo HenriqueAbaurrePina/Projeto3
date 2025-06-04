@@ -1,4 +1,5 @@
-<div class="p-4 max-w-4xl mx-auto">
+<div *ngIf="sprint && tipoUsuario">
+  <div class="p-4 max-w-4xl mx-auto">
     <h2 class="text-2xl font-bold mb-2">{{ sprint?.nome }}</h2>
     <p class="mb-1"><strong>Início:</strong> {{ sprint?.dataInicio | date }}</p>
     <p class="mb-4"><strong>Fim:</strong> {{ sprint?.dataFim | date }}</p>
@@ -22,27 +23,26 @@
 
     <div *ngIf="modoEdicao" class="p-4 border rounded bg-gray-100 mb-6">
       <h3 class="text-lg font-semibold mb-4">Editar Sprint</h3>
-      
-        <mat-form-field appearance="fill" class="w-full">
-          <mat-label>Nome</mat-label>
-          <input matInput [(ngModel)]="formSprint.nome">
-        </mat-form-field>
-      
-        <mat-form-field appearance="fill" class="w-full">
-          <mat-label>Data de Início</mat-label>
-          <input matInput [matDatepicker]="dpSprint" [(ngModel)]="formSprint.dataInicio">
-          <mat-datepicker-toggle matSuffix [for]="dpSprint"></mat-datepicker-toggle>
-          <mat-datepicker #dpSprint></mat-datepicker>
-        </mat-form-field>
-      
-        <div class="flex gap-4 mt-4">
-          <button class="bg-blue-600 text-white px-4 py-2 rounded" (click)="salvarEdicaoSprint()">
-            Salvar Alterações
-          </button>
-          <button class="bg-gray-500 text-white px-4 py-2 rounded" (click)="modoEdicao = false">
-            Cancelar
-          </button>
-        </div>
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Nome</mat-label>
+        <input matInput [(ngModel)]="formSprint.nome">
+      </mat-form-field>
+    
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Data de Início</mat-label>
+        <input matInput [matDatepicker]="dpSprint" [(ngModel)]="formSprint.dataInicio">
+        <mat-datepicker-toggle matSuffix [for]="dpSprint"></mat-datepicker-toggle>
+        <mat-datepicker #dpSprint></mat-datepicker>
+      </mat-form-field>
+    
+      <div class="flex gap-4 mt-4">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded" (click)="salvarEdicaoSprint()">
+          Salvar Alterações
+        </button>
+        <button class="bg-gray-500 text-white px-4 py-2 rounded" (click)="modoEdicao = false">
+          Cancelar
+        </button>
+      </div>
     </div>
       
   
@@ -129,32 +129,32 @@
         <p><strong>Entregue em:</strong> {{ entrega.dataEntregue | date:'shortDate' }}</p>
 
         <div *ngIf="entregaEmEdicaoId === entrega._id; else acoesEntregaConcluida">
-            <mat-form-field appearance="fill" class="block mb-2">
-              <mat-label>Título</mat-label>
-              <input matInput [(ngModel)]="formEntregaEdicao.titulo">
-            </mat-form-field>
-      
-            <mat-form-field appearance="fill" class="block mb-2">
-              <mat-label>Data Prevista</mat-label>
-              <input matInput [matDatepicker]="dpEditConcluida" [(ngModel)]="formEntregaEdicao.dataPrevista">
-              <mat-datepicker-toggle matSuffix [for]="dpEditConcluida"></mat-datepicker-toggle>
-              <mat-datepicker #dpEditConcluida></mat-datepicker>
-            </mat-form-field>
-      
-            <div class="flex gap-2 mt-2">
-              <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                      (click)="salvarEdicaoEntrega(entrega._id)">Salvar</button>
-              <button class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded"
-                      (click)="cancelarEdicaoEntrega()">Cancelar</button>
-              <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                      (click)="excluirEntrega(entrega._id)">Excluir</button>
-            </div>
+          <mat-form-field appearance="fill" class="block mb-2">
+            <mat-label>Título</mat-label>
+            <input matInput [(ngModel)]="formEntregaEdicao.titulo">
+          </mat-form-field>
+    
+          <mat-form-field appearance="fill" class="block mb-2">
+            <mat-label>Data Prevista</mat-label>
+            <input matInput [matDatepicker]="dpEditConcluida" [(ngModel)]="formEntregaEdicao.dataPrevista">
+            <mat-datepicker-toggle matSuffix [for]="dpEditConcluida"></mat-datepicker-toggle>
+            <mat-datepicker #dpEditConcluida></mat-datepicker>
+          </mat-form-field>
+    
+          <div class="flex gap-2 mt-2">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                    (click)="salvarEdicaoEntrega(entrega._id)">Salvar</button>
+            <button class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded"
+                    (click)="cancelarEdicaoEntrega()">Cancelar</button>
+            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                    (click)="excluirEntrega(entrega._id)">Excluir</button>
+          </div>
         </div>
         <ng-template #acoesEntregaConcluida>
-            <div class="flex gap-2 mt-2" *ngIf="tipoUsuario === 'adm'">
-              <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
-                      (click)="iniciarEdicaoEntrega(entrega)">Editar</button>
-            </div>
+          <div class="flex gap-2 mt-2" *ngIf="tipoUsuario === 'adm'">
+            <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded"
+                    (click)="iniciarEdicaoEntrega(entrega)">Editar</button>
+          </div>
         </ng-template>
       </div>
     </div>
@@ -182,4 +182,4 @@
       </app-sprint-calendar>
     </div>
   </div>
-  
+</div>

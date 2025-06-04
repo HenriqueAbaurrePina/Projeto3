@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -26,27 +27,34 @@ export class LoginComponent {
 
   onLogin() {
     this.auth.login(this.email, this.senha).subscribe({
-      next: res => {
-        if (!res?.accessToken) {
-          this.erro = 'Resposta inválida do servidor.';
-          return;
+      next: (res: any) => {
+        if (res?.accessToken) {
+          this.auth.setAccessToken(res.accessToken);
         }
-
-        this.auth.setToken(res.accessToken);
-
-        const payload = JSON.parse(atob(res.accessToken.split('.')[1]));
-        if (payload.tipo === 'adm') {
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.auth.getEmpresaDoUsuario().subscribe({
-            next: (empresa: any) => {
-              this.router.navigate(['/empresa', empresa._id]);
-            },
-            error: () => {
-              this.erro = 'Erro ao buscar empresa do usuário.';
+  
+        this.http.get(`${environment.apiUrl}/auth/usuario-logado`, { withCredentials: true }).subscribe({
+          next: (usuario: any) => {
+            if (usuario.tipo === 'adm') {
+              this.router.navigate(['/dashboard']);
+            } else {
+              this.auth.getEmpresaDoUsuario().subscribe({
+                next: (empresa: any[]) => {
+                  if (empresa.length > 0) {
+                    this.router.navigate(['/empresa', empresa[0]._id]);
+                  } else {
+                    this.erro = 'Usuário não possui empresas vinculadas.';
+                  }
+                },
+                error: () => {
+                  this.erro = 'Erro ao buscar empresa do usuário.';
+                }
+              });
             }
-          });
-        }
+          },
+          error: () => {
+            this.erro = 'Erro ao identificar usuário logado.';
+          }
+        });
       },
       error: () => {
         this.erro = 'Login inválido';

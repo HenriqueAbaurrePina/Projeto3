@@ -95,7 +95,7 @@ router.post('/refresh', async (req, res) => {
 
     res.cookie('refreshToken', novoRefreshRaw, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
       sameSite: 'Strict',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
@@ -118,7 +118,7 @@ router.post('/logout', async (req, res) => {
     await RefreshToken.deleteOne({ token: refreshTokenHash });
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false,
       sameSite: 'Strict',
       path: '/',
     });
