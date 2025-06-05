@@ -180,11 +180,11 @@ Esta parte apresenta de forma objetiva todas as **medidas de segurança ativamen
 
 ## 🌐 3. Proteção CORS
 
-- Controle total via NGINX:
-  - Origem permitida: `http://localhost:4200`
-  - `Access-Control-Allow-Credentials: true` configurado
-- Testado com `curl` usando origem falsa (`http://site-malicioso.com`)
-  - Requisição corretamente rejeitada (sem headers CORS)
+- O backend Express está configurado com `cors` e política de **origem restrita**:
+  - Apenas `http://localhost:4200` é aceito como origem.
+  - Outras origens recebem erro 500 com `Not allowed by CORS`.
+- Middleware responde corretamente a requisições **preflight (OPTIONS)**.
+- O uso de `credentials: true` permite cookies seguros sem exposição a outras origens.
 
 ---
 
@@ -222,8 +222,11 @@ Esta parte apresenta de forma objetiva todas as **medidas de segurança ativamen
 
 ---
 
-## ✅ Conclusão
+## 🌐 8. Proxy Reverso com NGINX
 
-O sistema implementa autenticação robusta baseada em JWT, proteção de refresh tokens via cookies seguros, rate limiting para mitigar abuso, e restrições CORS eficazes com controle no NGINX. Também protege senhas com hashing forte (`bcrypt`) e organiza os segredos de forma segura usando variáveis de ambiente.
+- Redireciona `/api/*` para `http://backend:3000`.
+- Vantagens:
+  - Roteamento limpo no Angular.
+  - CORS simplificado.
+  - Isolamento entre frontend e API.
 
-Essas práticas formam uma base sólida de segurança para ambientes de teste e produção.

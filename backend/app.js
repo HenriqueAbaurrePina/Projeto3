@@ -5,8 +5,23 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const iniciarLimpezaDeTokens = require('./jobs/limparTokensExpirados');
+const cors = require('cors');
 
 const app = express();
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = ['http://localhost:4200'];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'Content-Type', 'Accept', 'Authorization']
+};
 
 app.set('trust proxy', 1);
 
@@ -17,6 +32,9 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Middlewares de segurança
 app.use(helmet());
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use(cookieParser());
 
