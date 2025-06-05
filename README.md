@@ -147,3 +147,83 @@ O backend utiliza autenticação com tokens JWT. As rotas protegidas exigem envi
 3. **Registro** (`POST /register`)
 
    * Admins podem registrar outros usuários `filho`.
+
+# 🛡️ Medidas de Segurança Implementadas no Projeto
+
+Esta parte apresenta de forma objetiva todas as **medidas de segurança ativamente implementadas** no sistema, abrangendo autenticação, proteção contra ataques e práticas seguras de armazenamento.
+
+---
+
+## ✅ 1. Autenticação Segura
+
+- **JWT (JSON Web Token)**:
+  - Geração no login com `jwt.sign(...)`
+  - Expiração configurada (`1h`)
+  - Payload inclui `id` e `tipo` do usuário
+
+- **Refresh Token Seguro**:
+  - Armazenado com hash SHA-256 no banco de dados
+  - Enviado via cookie `httpOnly` com:
+    - `sameSite: 'Strict'`
+    - `maxAge`: 7 dias
+    - `secure: true` (apenas em produção)
+
+---
+
+## 🔐 2. Armazenamento de Senhas
+
+- As senhas são criptografadas com `bcrypt`:
+  - Fator de custo: 10
+  - Nunca armazenadas em texto puro
+
+---
+
+## 🌐 3. Proteção CORS
+
+- Controle total via NGINX:
+  - Origem permitida: `http://localhost:4200`
+  - `Access-Control-Allow-Credentials: true` configurado
+- Testado com `curl` usando origem falsa (`http://site-malicioso.com`)
+  - Requisição corretamente rejeitada (sem headers CORS)
+
+---
+
+## ⚙️ 4. Rate Limiting
+
+- Implementado com `express-rate-limit`
+  - Limite: 100 requisições por IP a cada 15 minutos
+  - Headers de controle (`X-RateLimit-*`) visíveis nas respostas
+
+---
+
+## 📦 5. Cookies Seguros
+
+- Refresh token armazenado em cookie:
+  - `httpOnly`: impede acesso via JavaScript
+  - `sameSite: 'Strict'`: bloqueia envio automático em requisições de terceiros
+  - `secure: true` ativado automaticamente em ambiente de produção (`NODE_ENV=production`)
+
+---
+
+## 📁 6. Variáveis de Ambiente
+
+- Segredos e configurações como `JWT_SECRET` e `MONGO_URL` estão armazenados em `.env`
+  - Mantidos fora do código-fonte
+
+---
+
+## 🧾 7. Logging de Requisições
+
+- Middleware de log registra:
+  - IP da requisição
+  - Método HTTP e rota
+  - Dados do corpo (exceto senha)
+  - Usuário autenticado (se disponível)
+
+---
+
+## ✅ Conclusão
+
+O sistema implementa autenticação robusta baseada em JWT, proteção de refresh tokens via cookies seguros, rate limiting para mitigar abuso, e restrições CORS eficazes com controle no NGINX. Também protege senhas com hashing forte (`bcrypt`) e organiza os segredos de forma segura usando variáveis de ambiente.
+
+Essas práticas formam uma base sólida de segurança para ambientes de teste e produção.

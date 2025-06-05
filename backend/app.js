@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
@@ -18,11 +17,6 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Middlewares de segurança
 app.use(helmet());
-
-app.use(cors({
-  origin: ['http://localhost:4200'], // ✅ Ajuste conforme frontend
-  credentials: true
-}));
 
 app.use(cookieParser());
 
