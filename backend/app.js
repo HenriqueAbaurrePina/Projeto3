@@ -51,6 +51,11 @@ app.use(express.json());
 const logMiddleware = require('./middlewares/logMiddleware');
 app.use(logMiddleware);
 
+// Middleware de métricas Prometheus
+const promBundle = require("express-prom-bundle");
+const metricsMiddleware = promBundle({ includeMethod: true });
+app.use(metricsMiddleware);
+
 // Importa middlewares
 const verifyToken = require('./middlewares/authMiddleware');
 

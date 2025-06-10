@@ -9,7 +9,29 @@ if (!fs.existsSync(logDir)) {
 
 const logStream = fs.createWriteStream(path.join(logDir, 'access.log'), { flags: 'a' });
 
+function sanitize(obj, camposSensiveis = ['senha', 'senhaHash', 'token', 'accessToken', 'refreshToken']) {
+  if (typeof obj !== 'object' || obj === null) return obj;
+
+  const copia = Array.isArray(obj) ? [...obj] : { ...obj };
+
+  for (const key in copia) {
+    if (typeof copia[key] === 'object' && copia[key] !== null) {
+      copia[key] = sanitize(copia[key], camposSensiveis);
+    } else if (typeof copia[key] === 'string') {
+      if (camposSensiveis.some(s => key.toLowerCase().includes(s.toLowerCase()))) {
+        copia[key] = '***';
+      }
+    }
+  }
+
+  return copia;
+}
+
 function logMiddleware(req, res, next) {
+  if (req.originalUrl === '/metrics') {
+    return next(); // Ignora log da rota do Prometheus
+  }
+  
   const timestamp = new Date().toISOString();
   const ip = req.ip;
   const rota = req.originalUrl;
@@ -17,16 +39,9 @@ function logMiddleware(req, res, next) {
   const usuario = req.usuario ? `${req.usuario.nome} (${req.usuario.id})` : 'Anônimo';
 
   // Clonar body/query/params para redigir campos sensíveis
-  const safeBody = { ...req.body };
-  const safeQuery = { ...req.query };
-  const safeParams = { ...req.params };
-  const camposSensiveis = ['senha', 'senhaHash', 'token', 'accessToken', 'refreshToken'];
-
-  camposSensiveis.forEach(campo => {
-    if (campo in safeBody) safeBody[campo] = '***';
-    if (campo in safeQuery) safeQuery[campo] = '***';
-    if (campo in safeParams) safeParams[campo] = '***';
-  });
+  const safeBody = sanitize(req.body);
+  const safeQuery = sanitize(req.query);
+  const safeParams = sanitize(req.params);
 
   const logDetalhado = {
     timestamp,

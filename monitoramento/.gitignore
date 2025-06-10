@@ -1,0 +1,16 @@
+# Ignora dados persistentes gerados por Grafana, Prometheus e Loki
+grafana/data/
+grafana/grafana.db
+prometheus/data/
+loki/data/
+promtail/positions.yaml
+
+# Logs locais (se existirem)
+*.log
+
+# Configs temporários ou de cache
+*.tmp
+*.bak
+
+# Ignorar plugins do Grafana
+grafana/plugins/
