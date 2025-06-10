@@ -204,6 +204,8 @@ spec:
         - name: loki
           image: grafana/loki
           args: ["-config.file=/etc/loki/local-config.yaml"]
+          securityContext:
+            runAsUser: 0
           ports:
             - containerPort: 3100
           volumeMounts:
