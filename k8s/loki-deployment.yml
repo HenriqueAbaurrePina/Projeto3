@@ -26,7 +26,7 @@ spec:
             - name: loki-config
               mountPath: /etc/loki/
             - name: loki-storage
-              mountPath: /tmp/loki
+              mountPath: /data/loki
       volumes:
         - name: loki-config
           configMap:
@@ -63,10 +63,10 @@ data:
             period: 24h
     storage_config:
       boltdb_shipper:
-        active_index_directory: /tmp/loki/index
-        cache_location: /tmp/loki/cache
+        active_index_directory: /data/index
+        cache_location: /data/cache
       filesystem:
-        directory: /tmp/loki/chunks
+        directory: /data/chunks
     limits_config:
       enforce_metric_name: false
       reject_old_samples: true
