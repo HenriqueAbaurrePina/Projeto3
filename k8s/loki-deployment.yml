@@ -20,7 +20,7 @@ spec:
       initContainers:
         - name: init-data
           image: busybox
-          command: ["sh", "-c", "mkdir -p /data/{chunks,index,cache,wal} && chown -R 10001:10001 /data"]
+          command: ["sh", "-c", "mkdir -p /data/{chunks,index,cache,wal} && chmod -R 777 /data"]
           volumeMounts:
             - name: loki-storage
               mountPath: /data
@@ -28,8 +28,6 @@ spec:
         - name: loki
           image: grafana/loki:2.9.2
           securityContext:
-            runAsUser: 10001
-            runAsGroup: 10001
             allowPrivilegeEscalation: false
           ports:
             - containerPort: 3100
