@@ -37,7 +37,7 @@ spec:
             - name: loki-config
               mountPath: /etc/loki/
             - name: loki-storage
-              mountPath: /data
+              mountPath: /loki
       volumes:
         - name: loki-config
           configMap:
@@ -57,7 +57,7 @@ data:
       http_listen_port: 3100
     ingester:
       wal:
-        dir: /data/wal
+        dir: /loki/wal
       lifecycler:
         ring:
           kvstore:
@@ -76,10 +76,10 @@ data:
             period: 24h
     storage_config:
       boltdb_shipper:
-        active_index_directory: /data/index
-        cache_location: /data/cache
+        active_index_directory: /loki/index
+        cache_location: /loki/cache
       filesystem:
-        directory: /data/chunks
+        directory: /loki/chunks
     limits_config:
       enforce_metric_name: false
       reject_old_samples: true
