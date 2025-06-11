@@ -32,13 +32,26 @@ data:
       - url: http://loki:3100/loki/api/v1/push
 
     scrape_configs:
-      - job_name: docker
-        docker_sd_configs:
-          - host: unix:///var/run/docker.sock
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
         relabel_configs:
-          - source_labels: [__meta_docker_container_name]
-            regex: "/(.*)"
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: node
+          - action: replace
+            source_labels: [__meta_kubernetes_pod_container_name]
             target_label: job
+          - action: keep
+            source_labels: [__meta_kubernetes_namespace]
+            regex: default
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -275,7 +288,18 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/promtail/
+            - name: varlog
+              mountPath: /var/log
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
       volumes:
         - name: config
           configMap:
             name: promtail-config
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers

@@ -11,7 +11,7 @@ const app = express();
 
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = ['http://localhost:4200'];
+    const allowedOrigins = ['http://74.163.168.235'];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -41,6 +41,7 @@ app.use(cookieParser());
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   max: 100,
+  skip: (req) => req.path === "/metrics",
   message: 'Muitas requisições do mesmo IP. Tente novamente em 15 minutos.'
 });
 app.use(limiter);
