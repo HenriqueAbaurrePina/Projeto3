@@ -275,12 +275,13 @@ spec:
     app: loki
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: promtail
   namespace: default
+  labels:
+    app: promtail
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: promtail
@@ -292,13 +293,13 @@ spec:
       serviceAccountName: promtail-sa
       containers:
         - name: promtail
-          image: grafana/promtail
+          image: grafana/promtail:3.1.1
           args:
             - -config.file=/etc/promtail/config.yml
             - -log.level=debug
           volumeMounts:
             - name: config
-              mountPath: /etc/promtail/
+              mountPath: /etc/promtail
             - name: varlog
               mountPath: /var/log
             - name: containers
