@@ -296,8 +296,8 @@ spec:
               mountPath: /etc/promtail/
             - name: varlog
               mountPath: /var/log
-            - name: varlibdockercontainers
-              mountPath: /var/lib/docker/containers
+            - name: containers
+              mountPath: /var/log/containers
               readOnly: true
       volumes:
         - name: config
@@ -306,6 +306,6 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        - name: varlibdockercontainers
+        - name: container
           hostPath:
-            path: /var/lib/docker/containers
+            path: /var/log/containers
