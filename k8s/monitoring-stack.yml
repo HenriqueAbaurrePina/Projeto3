@@ -58,6 +58,8 @@ data:
             replacement: /var/log/containers/$3_$2_$1-*.log
           - action: labelmap
             regex: __meta_kubernetes_pod_label_(.+)
+        pipeline_stages:
+          - cri: {}
 ---
 apiVersion: v1
 kind: ConfigMap
