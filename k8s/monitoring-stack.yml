@@ -294,8 +294,8 @@ spec:
         - name: promtail
           image: grafana/promtail
           args:
-            -config.file=/etc/promtail/config.yml
-            -log.level=debug
+            - -config.file=/etc/promtail/config.yml
+            - -log.level=debug
           volumeMounts:
             - name: config
               mountPath: /etc/promtail/
