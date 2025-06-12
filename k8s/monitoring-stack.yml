@@ -43,15 +43,15 @@ data:
               __path__: /var/log/containers/*.log
         relabel_configs:
           - source_labels: [__path__]
-            regex: "/var/log/containers/(.*)_(.*)_(.*)-.*\\.log"
+            regex: /var/log/containers/([^_]+)_([^_]+)_([^_]+)-.+\\.log
             target_label: pod
             replacement: "$1"
           - source_labels: [__path__]
-            regex: "/var/log/containers/(.*)_(.*)_(.*)-.*\\.log"
+            regex: /var/log/containers/([^_]+)_([^_]+)_([^_]+)-.+\\.log
             target_label: namespace
             replacement: "$2"
           - source_labels: [__path__]
-            regex: "/var/log/containers/(.*)_(.*)_(.*)-.*\\.log"
+            regex: /var/log/containers/([^_]+)_([^_]+)_([^_]+)-.+\\.log
             target_label: container
             replacement: "$3"
 ---
