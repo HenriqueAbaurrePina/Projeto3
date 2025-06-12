@@ -33,9 +33,6 @@ data:
 
     scrape_configs:
       - job_name: kubernetes-pods
-        pipeline_stages:
-          - docker: {}
-          - cri: {}
         static_configs:
           - targets: ['localhost']
             labels:
@@ -47,15 +44,15 @@ data:
             target_label: __path__
             replacement: /var/log/containers/$1_$2_$3.log
           - source_labels: [__path__]
-            regex: /var/log/containers/([^_]+)_([^_]+)_([^_]+)-.+\\.log
+            regex: /var/log/containers/([^_]+)_([^_]+)_([^_]+)\.log
             target_label: pod
             replacement: $1
           - source_labels: [__path__]
-            regex: /var/log/containers/([^_]+)_([^_]+)_([^_]+)-.+\\.log
+            regex: /var/log/containers/([^_]+)_([^_]+)_([^_]+)\.log
             target_label: namespace
             replacement: $2
           - source_labels: [__path__]
-            regex: /var/log/containers/([^_]+)_([^_]+)_([^_]+)-.+\\.log
+            regex: /var/log/containers/([^_]+)_([^_]+)_([^_]+)\.log
             target_label: container
             replacement: $3
 ---
@@ -306,6 +303,6 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
-        - name: container
+        - name: containers
           hostPath:
             path: /var/log/containers
