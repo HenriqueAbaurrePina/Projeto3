@@ -46,8 +46,7 @@ data:
             target_label: node
           - source_labels: [__meta_kubernetes_pod_label_app]
             target_label: app
-          - action: replace
-            source_labels: [__meta_kubernetes_pod_container_name]
+          - source_labels: [__meta_kubernetes_pod_label_app]
             target_label: job
           - action: keep
             source_labels: [__meta_kubernetes_namespace]
