@@ -57,6 +57,8 @@ data:
             regex: (.+);(.+);(.+)
             target_label: __path__
             replacement: /var/log/containers/$3_$2_$1-*.log
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
 ---
 apiVersion: v1
 kind: ConfigMap
