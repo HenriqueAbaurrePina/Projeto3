@@ -21,3 +21,15 @@ spec:
           image: henriquepina/proj3-frontend:latest
           ports:
             - containerPort: 80
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /var/log
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+      volumes:
+        - name: logs-volume
+          persistentVolumeClaim:
+            claimName: logs-volume

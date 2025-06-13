@@ -24,6 +24,7 @@ data:
     server:
       http_listen_port: 9080
       grpc_listen_port: 0
+      log_level: debug
 
     positions:
       filename: /tmp/positions.yaml
@@ -32,34 +33,21 @@ data:
       - url: http://loki:3100/loki/api/v1/push
 
     scrape_configs:
-      - job_name: kubernetes-pods
-        kubernetes_sd_configs:
-          - role: pod
-        relabel_configs:
-          - source_labels: [__meta_kubernetes_namespace]
-            target_label: namespace
-          - source_labels: [__meta_kubernetes_pod_name]
-            target_label: pod
-          - source_labels: [__meta_kubernetes_pod_container_name]
-            target_label: container
-          - source_labels: [__meta_kubernetes_pod_node_name]
-            target_label: node
-          - source_labels: [__meta_kubernetes_pod_label_app]
-            target_label: app
-          - source_labels: [__meta_kubernetes_pod_label_app]
-            target_label: job
-          - action: keep
-            source_labels: [__meta_kubernetes_namespace]
-            regex: default
-          - action: replace
-            source_labels: [__meta_kubernetes_pod_container_name,__meta_kubernetes_namespace,__meta_kubernetes_pod_name]
-            regex: (.+);(.+);(.+)
-            target_label: __path__
-            replacement: /var/log/containers/$3_$2_$1-*.log
-          - action: labelmap
-            regex: __meta_kubernetes_pod_label_(.+)
+      - job_name: generated-logs
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: generated-logs
+              __path__: /var/log/generated-logs.txt
         pipeline_stages:
-          - cri: {}
+          - json:
+              expressions:
+                http_method: 'method'
+                http_status: 'status'
+          - labels:
+              http_method:
+              http_status:
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -121,6 +109,52 @@ spec:
   resources:
     requests:
       storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: logs-volume
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-generator
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-generator
+  template:
+    metadata:
+      labels:
+        app: log-generator
+    spec:
+      containers:
+        - name: log-generator
+          image: mingrammer/flog:0.4.3
+          args:
+            - --loop
+            - --format=json
+            - --number=10
+            - --delay=100ms
+            - --output=/var/log/generated-logs.txt
+            - --overwrite
+            - --type=log
+          volumeMounts:
+            - name: log-storage
+              mountPath: /var/log
+      volumes:
+        - name: log-storage
+          persistentVolumeClaim:
+            claimName: logs-volume
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -300,21 +334,15 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/promtail
-            - name: varlog
+            - name: log-storage
               mountPath: /var/log
-            - name: containers
-              mountPath: /var/log/containers
-              readOnly: true
       volumes:
         - name: config
           configMap:
             name: promtail-config
-        - name: varlog
-          hostPath:
-            path: /var/log
-        - name: containers
-          hostPath:
-            path: /var/log/containers
+        - name: log-storage
+          persistentVolumeClaim:
+            claimName: logs-volume
 ---
 apiVersion: v1
 kind: ServiceAccount
