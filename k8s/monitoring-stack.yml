@@ -125,34 +125,36 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: log-generator
+  name: log-forwarder
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: log-generator
+      app: log-forwarder
   template:
     metadata:
       labels:
-        app: log-generator
+        app: log-forwarder
     spec:
       containers:
-        - name: log-generator
-          image: mingrammer/flog:0.4.3
+        - name: log-forwarder
+          image: alpine
+          command: ["/bin/sh", "-c"]
           args:
-            - --loop
-            - --format=json
-            - --number=10
-            - --delay=100ms
-            - --output=/var/log/generated-logs.txt
-            - --overwrite
-            - --type=log
+            - |
+              touch /var/log/generated-logs.txt;
+              tail -F /app/logs/*.log >> /var/log/generated-logs.txt
           volumeMounts:
             - name: log-storage
               mountPath: /var/log
+            - name: app-logs
+              mountPath: /app/logs
       volumes:
         - name: log-storage
+          persistentVolumeClaim:
+            claimName: logs-volume
+        - name: app-logs
           persistentVolumeClaim:
             claimName: logs-volume
 ---

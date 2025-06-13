@@ -28,7 +28,7 @@ spec:
                 name: backend-secrets
           volumeMounts:
             - name: logs-volume
-              mountPath: /var/log
+              mountPath: /app/logs
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false

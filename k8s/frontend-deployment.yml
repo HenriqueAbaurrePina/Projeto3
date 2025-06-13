@@ -22,9 +22,9 @@ spec:
           ports:
             - containerPort: 80
           volumeMounts:
-            - name: logs-volume
-              mountPath: /var/log/nginx
-            - name: cache-volume
+            - name: app-logs
+              mountPath: /app/logs
+            - name: nginx-temp
               mountPath: /var/cache/nginx
           securityContext:
             readOnlyRootFilesystem: true
@@ -32,8 +32,8 @@ spec:
             runAsNonRoot: true
             runAsUser: 1000
       volumes:
-        - name: logs-volume
+        - name: app-logs
           persistentVolumeClaim:
             claimName: logs-volume
-        - name: cache-volume
+        - name: nginx-temp
           emptyDir: {}
