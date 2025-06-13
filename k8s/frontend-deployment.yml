@@ -21,7 +21,7 @@ spec:
           image: busybox
           command: ["sh", "-c", "mkdir -p /app/logs && chown -R 1000:1000 /app/logs"]
           volumeMounts:
-            - name: logs-volume
+            - name: app-logs
               mountPath: /app/logs
       containers:
         - name: frontend
