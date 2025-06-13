@@ -143,8 +143,11 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
+              mkdir -p /var/log;
               touch /var/log/generated-logs.txt;
-              tail -F /app/logs/*.log >> /var/log/generated-logs.txt
+              echo "📦 Log forwarder aguardando arquivos em /app/logs/*.log...";
+              while [ ! -f /app/logs/access.log ]; do sleep 1; done;
+              exec tail -F /app/logs/*.log >> /var/log/generated-logs.txt
           volumeMounts:
             - name: log-storage
               mountPath: /var/log
