@@ -16,11 +16,18 @@ spec:
         app: frontend
         tier: frontend
     spec:
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "mkdir -p /app/logs && chown -R 1000:1000 /app/logs"]
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /app/logs
       containers:
         - name: frontend
           image: henriquepina/proj3-frontend:latest
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           volumeMounts:
             - name: app-logs
               mountPath: /app/logs
