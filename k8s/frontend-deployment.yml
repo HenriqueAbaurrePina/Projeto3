@@ -23,7 +23,9 @@ spec:
             - containerPort: 80
           volumeMounts:
             - name: logs-volume
-              mountPath: /var/log
+              mountPath: /var/log/nginx
+            - name: cache-volume
+              mountPath: /var/cache/nginx
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -33,3 +35,5 @@ spec:
         - name: logs-volume
           persistentVolumeClaim:
             claimName: logs-volume
+        - name: cache-volume
+          emptyDir: {}

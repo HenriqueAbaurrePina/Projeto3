@@ -1,13 +1,19 @@
 const fs = require('fs');
 const path = require('path');
 
+// Detecta se está rodando no Kubernetes
+const isKubernetes = process.env.KUBERNETES_SERVICE_HOST !== undefined;
+const logFilePath = isKubernetes
+  ? '/var/log/generated-logs.txt'
+  : path.join(__dirname, '../logs/access.log');
+
 // Garante que a pasta de logs existe
-const logDir = path.join(__dirname, '../logs');
+const logDir = path.dirname(logFilePath);
 if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir);
+  fs.mkdirSync(logDir, { recursive: true });
 }
 
-const logStream = fs.createWriteStream(path.join(logDir, 'access.log'), { flags: 'a' });
+const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
 
 function sanitize(obj, camposSensiveis = ['senha', 'senhaHash', 'token', 'accessToken', 'refreshToken']) {
   if (typeof obj !== 'object' || obj === null) return obj;
