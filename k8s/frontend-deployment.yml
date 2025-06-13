@@ -33,6 +33,8 @@ spec:
               mountPath: /app/logs
             - name: nginx-temp
               mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /var/run
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
@@ -43,4 +45,6 @@ spec:
           persistentVolumeClaim:
             claimName: logs-volume
         - name: nginx-temp
+          emptyDir: {}
+        - name: nginx-run
           emptyDir: {}
