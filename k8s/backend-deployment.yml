@@ -21,7 +21,7 @@ spec:
           image: busybox
           command: ["sh", "-c", "mkdir -p /app/logs && chown -R 1000:1000 /app/logs"]
           volumeMounts:
-            - name: logs-volume
+            - name: logs
               mountPath: /app/logs
       containers:
         - name: backend
@@ -34,14 +34,14 @@ spec:
             - secretRef:
                 name: backend-secrets
           volumeMounts:
-            - name: logs-volume
-              mountPath: /app/logs
+            - name: logs
+              mountPath: /app/logs/backend
           securityContext:
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
             runAsNonRoot: true
             runAsUser: 1000
       volumes:
-        - name: logs-volume
+        - name: logs
           persistentVolumeClaim:
-            claimName: logs-backend-pvc
+            claimName: logs-shared-pvc

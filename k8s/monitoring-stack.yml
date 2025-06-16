@@ -113,31 +113,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: logs-backend-pvc
-  namespace: default
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: logs-frontend-pvc
-  namespace: default
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: logs-output-pvc
+  name: logs-shared-pvc
   namespace: default
 spec:
   accessModes:
@@ -170,27 +146,17 @@ spec:
               echo "📦 Aguardando arquivos de log...";
               mkdir -p /var/log;
               touch /var/log/generated-logs.txt;
-              while [ ! -f /input/backend/access.log ] && [ ! -f /input/frontend/access.log ]; do sleep 2; done;
-              tail -F /input/backend/*.log /input/frontend/*.log >> /var/log/generated-logs.txt
+              while [ ! -f /logs/backend/access.log ] && [ ! -f /logs/frontend/access.log ]; do sleep 2; done;
+              tail -F /logs/backend/*.log /logs/frontend/*.log >> /var/log/generated-logs.txt
           volumeMounts:
-            - name: backend-logs
-              mountPath: /input/backend
-              readOnly: true
-            - name: frontend-logs
-              mountPath: /input/frontend
-              readOnly: true
-            - name: output-logs
+            - name: logs-shared
+              mountPath: /logs
+            - name: logs-shared
               mountPath: /var/log
       volumes:
-        - name: backend-logs
+        - name: logs-shared
           persistentVolumeClaim:
-            claimName: logs-backend-pvc
-        - name: frontend-logs
-          persistentVolumeClaim:
-            claimName: logs-frontend-pvc
-        - name: output-logs
-          persistentVolumeClaim:
-            claimName: logs-output-pvc
+            claimName: logs-shared-pvc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -378,7 +344,7 @@ spec:
             name: promtail-config
         - name: log-storage
           persistentVolumeClaim:
-            claimName: logs-output-pvc
+            claimName: logs-shared-pvc
 ---
 apiVersion: v1
 kind: ServiceAccount

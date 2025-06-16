@@ -21,7 +21,7 @@ spec:
           image: busybox
           command: ["sh", "-c", "mkdir -p /app/logs && chown -R 1000:1000 /app/logs"]
           volumeMounts:
-            - name: logs-volume
+            - name: logs
               mountPath: /app/logs
       containers:
         - name: frontend
@@ -29,8 +29,8 @@ spec:
           ports:
             - containerPort: 8080
           volumeMounts:
-            - name: logs-volume
-              mountPath: /app/logs
+            - name: logs
+              mountPath: /app/logs/frontend
             - name: nginx-temp
               mountPath: /var/cache/nginx
             - name: nginx-run
@@ -41,9 +41,9 @@ spec:
             runAsNonRoot: true
             runAsUser: 1000
       volumes:
-        - name: logs-volume
+        - name: logs
           persistentVolumeClaim:
-            claimName: logs-frontend-pvc
+            claimName: logs-shared-pvc
         - name: nginx-temp
           emptyDir: {}
         - name: nginx-run
