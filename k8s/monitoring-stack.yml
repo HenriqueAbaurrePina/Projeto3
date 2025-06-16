@@ -146,11 +146,11 @@ spec:
               echo "📦 Aguardando arquivos de log...";
               mkdir -p /var/log;
               touch /var/log/generated-logs.txt;
-              while [ ! -f /logs/backend/access.log ] && [ ! -f /logs/frontend/access.log ]; do sleep 2; done;
-              tail -F /logs/backend/*.log /logs/frontend/*.log >> /var/log/generated-logs.txt
+              while [ ! -f /app/logs/backend/access.log ] && [ ! -f /app/logs/frontend/access.log ]; do sleep 2; done;
+              tail -F /app/logs/backend/*.log /app/logs/frontend/*.log >> /var/log/generated-logs.txt
           volumeMounts:
             - name: logs-shared
-              mountPath: /logs
+              mountPath: /app/logs
             - name: logs-shared
               mountPath: /var/log
       volumes:

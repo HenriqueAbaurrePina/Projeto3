@@ -4,7 +4,7 @@ const path = require('path');
 // Detecta se está rodando no Kubernetes
 const isKubernetes = process.env.KUBERNETES_SERVICE_HOST !== undefined;
 const logFilePath = isKubernetes
-  ? '/app/logs/access.log'
+  ? '/app/logs/backend/access.log'
   : path.join(__dirname, '../logs/access.log');
 
 // Garante que a pasta de logs existe
