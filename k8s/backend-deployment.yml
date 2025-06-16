@@ -44,4 +44,4 @@ spec:
       volumes:
         - name: logs-volume
           persistentVolumeClaim:
-            claimName: logs-volume
+            claimName: logs-backend-pvc

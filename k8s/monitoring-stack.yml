@@ -33,12 +33,12 @@ data:
       - url: http://loki:3100/loki/api/v1/push
 
     scrape_configs:
-      - job_name: generated-logs
+      - job_name: aggregated-logs
         static_configs:
           - targets:
               - localhost
             labels:
-              job: generated-logs
+              job: aggregated-logs
               __path__: /var/log/generated-logs.txt
         pipeline_stages:
           - json:
@@ -113,7 +113,31 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: logs-volume
+  name: logs-backend-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: logs-frontend-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: logs-output-pvc
   namespace: default
 spec:
   accessModes:
@@ -143,23 +167,30 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
+              echo "📦 Aguardando arquivos de log...";
               mkdir -p /var/log;
               touch /var/log/generated-logs.txt;
-              echo "📦 Log forwarder aguardando arquivos em /app/logs/*.log...";
-              while [ ! -f /app/logs/access.log ]; do sleep 1; done;
-              exec tail -F /app/logs/*.log >> /var/log/generated-logs.txt
+              while [ ! -f /input/backend/access.log ] && [ ! -f /input/frontend/access.log ]; do sleep 2; done;
+              tail -F /input/backend/*.log /input/frontend/*.log >> /var/log/generated-logs.txt
           volumeMounts:
-            - name: log-storage
+            - name: backend-logs
+              mountPath: /input/backend
+              readOnly: true
+            - name: frontend-logs
+              mountPath: /input/frontend
+              readOnly: true
+            - name: output-logs
               mountPath: /var/log
-            - name: app-logs
-              mountPath: /app/logs
       volumes:
-        - name: log-storage
+        - name: backend-logs
           persistentVolumeClaim:
-            claimName: logs-volume
-        - name: app-logs
+            claimName: logs-backend-pvc
+        - name: frontend-logs
           persistentVolumeClaim:
-            claimName: logs-volume
+            claimName: logs-frontend-pvc
+        - name: output-logs
+          persistentVolumeClaim:
+            claimName: logs-output-pvc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -347,7 +378,7 @@ spec:
             name: promtail-config
         - name: log-storage
           persistentVolumeClaim:
-            claimName: logs-volume
+            claimName: logs-output-pvc
 ---
 apiVersion: v1
 kind: ServiceAccount
