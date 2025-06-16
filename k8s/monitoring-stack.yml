@@ -147,7 +147,7 @@ spec:
               echo "📦 Aguardando arquivos de log...";
               mkdir -p /var/log;
               touch /var/log/generated-logs.txt;
-              while [ ! -s /app/logs/backend/access.log ] || [ ! -s /app/logs/frontend/access.log ]; do sleep 2; done;
+              while [ ! -f /app/logs/backend/access.log ] || [ ! -f /app/logs/frontend/access.log ]; do sleep 2; done;
               (
                 tail -F /app/logs/backend/access.log | sed 's/^/[BACKEND] /' &
                 tail -F /app/logs/frontend/access.log | sed 's/^/[FRONTEND] /' &
