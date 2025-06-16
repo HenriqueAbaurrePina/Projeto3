@@ -148,11 +148,11 @@ spec:
               mkdir -p /var/log;
               touch /var/log/generated-logs.txt;
               while [ ! -f /app/logs/backend/access.log ] || [ ! -f /app/logs/frontend/access.log ]; do sleep 2; done;
-              (
-                tail -F /app/logs/backend/access.log | sed 's/^/[BACKEND] /' &
-                tail -F /app/logs/frontend/access.log | sed 's/^/[FRONTEND] /' &
-                wait
-              ) >> /var/log/generated-logs.txt
+
+              tail -F /app/logs/backend/access.log | while read line; do echo "[BACKEND] $line"; done | tee -a /var/log/generated-logs.txt &
+              tail -F /app/logs/frontend/access.log | while read line; do echo "[FRONTEND] $line"; done | tee -a /var/log/generated-logs.txt &
+              
+              wait
           volumeMounts:
             - name: logs-shared
               mountPath: /app/logs
