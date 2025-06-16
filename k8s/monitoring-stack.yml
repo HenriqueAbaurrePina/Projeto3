@@ -140,6 +140,10 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
+              echo "📦 Log forwarder inicializando...";
+              mkdir -p /app/logs/backend /app/logs/frontend;
+              touch /app/logs/backend/access.log /app/logs/frontend/access.log;
+              chown -R 1000:1000 /app/logs;
               echo "📦 Aguardando arquivos de log...";
               mkdir -p /var/log;
               touch /var/log/generated-logs.txt;
