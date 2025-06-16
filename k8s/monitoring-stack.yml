@@ -41,13 +41,10 @@ data:
               job: aggregated-logs
               __path__: /var/log/generated-logs.txt
         pipeline_stages:
-          - json:
-              expressions:
-                http_method: 'method'
-                http_status: 'status'
+          - regex:
+              expression: '^\[(?P<app>\w+)\]'
           - labels:
-              http_method:
-              http_status:
+              app:
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -146,8 +143,9 @@ spec:
               echo "📦 Aguardando arquivos de log...";
               mkdir -p /var/log;
               touch /var/log/generated-logs.txt;
-              while [ ! -f /app/logs/backend/access.log ] && [ ! -f /app/logs/frontend/access.log ]; do sleep 2; done;
-              tail -F /app/logs/backend/*.log /app/logs/frontend/*.log >> /var/log/generated-logs.txt
+              while [ ! -f /app/logs/backend/access.log ] || [ ! -f /app/logs/frontend/access.log ]; do sleep 2; done;
+              tail -F /app/logs/backend/*.log | sed 's/^/[BACKEND] /' >> /var/log/generated-logs.txt & \
+              tail -F /app/logs/frontend/*.log | sed 's/^/[FRONTEND] /' >> /var/log/generated-logs.txt
           volumeMounts:
             - name: logs-shared
               mountPath: /app/logs
