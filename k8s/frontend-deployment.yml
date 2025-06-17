@@ -16,21 +16,12 @@ spec:
         app: frontend
         tier: frontend
     spec:
-      initContainers:
-        - name: fix-permissions
-          image: busybox
-          command: ["sh", "-c", "mkdir -p /app/logs && chown -R 1000:1000 /app/logs"]
-          volumeMounts:
-            - name: logs
-              mountPath: /app/logs
       containers:
         - name: frontend
           image: henriquepina/proj3-frontend:latest
           ports:
             - containerPort: 8080
           volumeMounts:
-            - name: logs
-              mountPath: /app/logs
             - name: nginx-temp
               mountPath: /var/cache/nginx
             - name: nginx-run
@@ -41,9 +32,6 @@ spec:
             runAsNonRoot: true
             runAsUser: 1000
       volumes:
-        - name: logs
-          persistentVolumeClaim:
-            claimName: logs-shared-pvc
         - name: nginx-temp
           emptyDir: {}
         - name: nginx-run
