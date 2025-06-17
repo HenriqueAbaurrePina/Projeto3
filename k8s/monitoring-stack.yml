@@ -33,18 +33,20 @@ data:
       - url: http://loki:3100/loki/api/v1/push
 
     scrape_configs:
-      - job_name: aggregated-logs
-        static_configs:
-          - targets:
-              - localhost
-            labels:
-              job: aggregated-logs
-              __path__: /var/log/generated-logs.txt
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
         pipeline_stages:
-          - regex:
-              expression: '^\[(?P<app>\w+)\]'
-          - labels:
-              app:
+          - docker: {}
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -106,70 +108,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: logs-shared-pvc
-  namespace: default
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: log-forwarder
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: log-forwarder
-  template:
-    metadata:
-      labels:
-        app: log-forwarder
-    spec:
-      containers:
-        - name: log-forwarder
-          image: alpine
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              echo '📜 Criando script de forwarding...';
-              cat << 'EOF' > /start.sh
-              #!/bin/sh
-              echo "📦 Log forwarder inicializando...";
-              mkdir -p /app/logs/backend /app/logs/frontend;
-              touch /app/logs/backend/access.log /app/logs/frontend/access.log;
-              chown -R 1000:1000 /app/logs;
-              mkdir -p /var/log;
-              touch /var/log/generated-logs.txt;
-              chown -R 1000:1000 /var/log;
-
-              echo "⏳ Aguardando logs com conteúdo...";
-              while ! grep -q . /app/logs/backend/access.log; do sleep 1; done;
-
-              echo "🚀 Iniciando redirecionamento de logs...";
-              tail -F /app/logs/backend/access.log | sed 's/^/[BACKEND] /' >> /var/log/generated-logs.txt &
-              tail -F /app/logs/frontend/access.log | sed 's/^/[FRONTEND] /' >> /var/log/generated-logs.txt &
-              wait
-              EOF
-              chmod +x /start.sh
-              sh /start.sh
-          volumeMounts:
-            - name: logs-shared
-              mountPath: /app/logs
-            - name: logs-shared
-              mountPath: /var/log
-      volumes:
-        - name: logs-shared
-          persistentVolumeClaim:
-            claimName: logs-shared-pvc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -349,15 +287,10 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/promtail
-            - name: log-storage
-              mountPath: /var/log
       volumes:
         - name: config
           configMap:
             name: promtail-config
-        - name: log-storage
-          persistentVolumeClaim:
-            claimName: logs-shared-pvc
 ---
 apiVersion: v1
 kind: ServiceAccount
