@@ -30,7 +30,7 @@ spec:
             - containerPort: 8080
           volumeMounts:
             - name: logs
-              mountPath: /app/logs/frontend
+              mountPath: /app/logs
             - name: nginx-temp
               mountPath: /var/cache/nginx
             - name: nginx-run
