@@ -144,15 +144,15 @@ spec:
               mkdir -p /app/logs/backend /app/logs/frontend;
               touch /app/logs/backend/access.log /app/logs/frontend/access.log;
               chown -R 1000:1000 /app/logs;
-              echo "📦 Aguardando arquivos de log...";
               mkdir -p /var/log;
               touch /var/log/generated-logs.txt;
-              while [ ! -f /app/logs/backend/access.log ] || [ ! -f /app/logs/frontend/access.log ]; do sleep 2; done;
-
+              chown -R 1000:1000 /var/log;
+              echo "📦 Aguardando arquivos de log serem preenchidos...";
+              while ! grep -q . /app/logs/backend/access.log || ! grep -q . /app/logs/frontend/access.log; do sleep 2; done;
+              echo "🚀 Iniciando redirecionamento de logs...";
               tail -F /app/logs/backend/access.log | sed 's/^/[BACKEND] /' >> /var/log/generated-logs.txt &
               tail -F /app/logs/frontend/access.log | sed 's/^/[FRONTEND] /' >> /var/log/generated-logs.txt &
-              
-              wait
+              wait;
           volumeMounts:
             - name: logs-shared
               mountPath: /app/logs
