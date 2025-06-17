@@ -149,8 +149,8 @@ spec:
               touch /var/log/generated-logs.txt;
               while [ ! -f /app/logs/backend/access.log ] || [ ! -f /app/logs/frontend/access.log ]; do sleep 2; done;
 
-              tail -F /app/logs/backend/access.log | awk '{ print "[BACKEND] " $0 }' >> /var/log/generated-logs.txt &
-              tail -F /app/logs/frontend/access.log | awk '{ print "[FRONTEND] " $0 }' >> /var/log/generated-logs.txt &
+              tail -F /app/logs/backend/access.log | sed 's/^/[BACKEND] /' >> /var/log/generated-logs.txt &
+              tail -F /app/logs/frontend/access.log | sed 's/^/[FRONTEND] /' >> /var/log/generated-logs.txt &
               
               wait
           volumeMounts:
