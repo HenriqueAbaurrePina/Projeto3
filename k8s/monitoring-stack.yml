@@ -51,9 +51,11 @@ data:
             target_label: container
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: node
-          - action: replace
-            replacement: /var/log/pods/*/*/*.log
+          - source_labels: [__meta_kubernetes_pod_container_name, __meta_kubernetes_pod_uid]
+            separator: "/"
+            replacement: /var/log/containers/*$1*.log
             target_label: __path__
+            action: replace
 ---
 apiVersion: v1
 kind: ConfigMap
