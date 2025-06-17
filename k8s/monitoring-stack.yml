@@ -293,6 +293,8 @@ spec:
           args:
             - -config.file=/etc/promtail/config.yml
             - -log.level=debug
+          securityContext:
+            privileged: true
           volumeMounts:
             - name: config
               mountPath: /etc/promtail
