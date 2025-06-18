@@ -39,24 +39,22 @@ data:
         pipeline_stages:
           - docker: {}
         relabel_configs:
-          - action: labelmap
-            regex: __meta_kubernetes_pod_label_(.+)
-          - source_labels: [__meta_kubernetes_namespace]
-            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
           - source_labels: [__meta_kubernetes_pod_name]
             target_label: pod
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
           - source_labels: [__meta_kubernetes_pod_container_name]
             target_label: container
-          - action: replace
-            replacement: /var/log/containers
-            target_label: __path_prefix__
           - action: replace
             source_labels:
               - __meta_kubernetes_pod_name
               - __meta_kubernetes_namespace
               - __meta_kubernetes_pod_container_name
-            regex: (.*);(.*);(.*)
-            replacement: /var/log/containers/${1}_${2}_${3}-.log
+            separator: "_"
+            regex: (.+)_(.+)_(.+)
+            replacement: /var/log/containers/${1}_${2}_${3}-*.log
             target_label: __path__
 ---
 apiVersion: v1
