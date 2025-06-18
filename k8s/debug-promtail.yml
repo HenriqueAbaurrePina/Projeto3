@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: promtail-debug
+  namespace: default
+spec:
+  hostPID: true
+  tolerations:
+    - operator: Exists
+  containers:
+    - name: debug
+      image: alpine:3.18
+      securityContext:
+        privileged: true
+        runAsUser: 0
+      command: ["sleep", "1d"]
+      volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: podlogs
+          mountPath: /var/log/pods
+        - name: containers
+          mountPath: /var/log/containers
+        - name: libcontainers
+          mountPath: /var/lib/docker/containers
+  volumes:
+    - name: varlog
+      hostPath:
+        path: /var/log
+    - name: podlogs
+      hostPath:
+        path: /var/log/pods
+    - name: containers
+      hostPath:
+        path: /var/log/containers
+    - name: libcontainers
+      hostPath:
+        path: /var/lib/docker/containers
