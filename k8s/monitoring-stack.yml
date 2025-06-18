@@ -56,7 +56,7 @@ data:
           - targets: ['localhost']
             labels:
               job: kube-logs-pods
-              __path__: /var/log/pods/*/*.log      
+              __path__: /var/log/pods/*/*/*.log      
       - job_name: kubernetes-logs-containers
         static_configs:
           - targets: ['localhost']
