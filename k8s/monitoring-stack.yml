@@ -62,10 +62,10 @@ data:
             target_label: node
           - action: labelmap
             regex: __meta_kubernetes_pod_label_(.+)
-          - source_labels: ["__meta_kubernetes_pod_name, __meta_kubernetes_pod_container_name"]
+          - source_labels: [__meta_kubernetes_pod_name, __meta_kubernetes_pod_container_name]
             target_label: __path__
-            regex: "(.+);(.+)"
-            replacement: /var/log/pods/${1}_${2}/0.log
+            regex: '(.+);(.+)'
+            replacement: '/var/log/pods/${1}_${2}/0.log'
 ---
 apiVersion: v1
 kind: ConfigMap
