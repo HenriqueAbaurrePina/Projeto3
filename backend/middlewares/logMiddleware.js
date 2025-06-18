@@ -3,17 +3,16 @@ const path = require('path');
 
 // Detecta se está rodando no Kubernetes
 const isKubernetes = process.env.KUBERNETES_SERVICE_HOST !== undefined;
-const logFilePath = isKubernetes
-  ? '/app/logs/backend/access.log'
-  : path.join(__dirname, '../logs/access.log');
+let logStream = null;
 
-// Garante que a pasta de logs existe
-const logDir = path.dirname(logFilePath);
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
+if (!isKubernetes) {
+  const logFilePath = path.join(__dirname, '../logs/access.log');
+  const logDir = path.dirname(logFilePath);
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+  logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
 }
-
-const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
 
 function sanitize(obj, camposSensiveis = ['senha', 'senhaHash', 'token', 'accessToken', 'refreshToken']) {
   if (typeof obj !== 'object' || obj === null) return obj;
@@ -34,10 +33,8 @@ function sanitize(obj, camposSensiveis = ['senha', 'senhaHash', 'token', 'access
 }
 
 function logMiddleware(req, res, next) {
-  if (req.originalUrl === '/metrics') {
-    return next(); // Ignora log da rota do Prometheus
-  }
-  
+  if (req.originalUrl === '/metrics') return next();
+
   const timestamp = new Date().toISOString();
   const ip = req.ip;
   const rota = req.originalUrl;
@@ -49,21 +46,18 @@ function logMiddleware(req, res, next) {
   const safeQuery = sanitize(req.query);
   const safeParams = sanitize(req.params);
 
-  const logDetalhado = {
-    timestamp,
-    metodo,
-    rota,
-    ip,
-    usuario,
-    body: safeBody,
-    query: safeQuery,
-    params: safeParams
-  };
+  const logLinha = `[${timestamp}] ${metodo} ${rota} - IP: ${ip} - Usuário: ${usuario}`;
 
-  const logTexto = `[${timestamp}] ${metodo} ${rota} - IP: ${ip} - Usuário: ${usuario}\n`;
-  logStream.write(logTexto);
-  console.log(logTexto.trim());
-  console.debug('🧾 Detalhes da requisição:', JSON.stringify(logDetalhado, null, 2));
+  // Log para console (Kubernetes + Docker)
+  console.log(logLinha);
+  console.debug('🧾 Detalhes da requisição:', JSON.stringify({
+    timestamp, metodo, rota, ip, usuario, body: safeBody, query: safeQuery, params: safeParams
+  }, null, 2));
+
+  // Log para arquivo (apenas fora do Kubernetes)
+  if (!isKubernetes && logStream) {
+    logStream.write(logLinha + '\n');
+  }
 
   next();
 }
