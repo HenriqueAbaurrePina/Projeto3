@@ -267,8 +267,14 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 3100
+    - name: http
+      protocol: TCP
+      port: 3100
       targetPort: 3100
+    - name: grpc
+      protocol: TCP
+      port: 9096
+      targetPort: 9096
   selector:
     app: loki
 ---
