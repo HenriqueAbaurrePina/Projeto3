@@ -35,6 +35,8 @@ data:
       - job_name: kubernetes-pods
         kubernetes_sd_configs:
           - role: pod
+        pipeline_stages:
+          - docker: {}
         relabel_configs:
           - source_labels: [__meta_kubernetes_namespace]
             target_label: namespace
@@ -46,20 +48,15 @@ data:
             target_label: node
           - source_labels: [__meta_kubernetes_pod_label_app]
             target_label: app
-          - source_labels: [__meta_kubernetes_pod_label_app]
-            target_label: job
-          - action: keep
-            source_labels: [__meta_kubernetes_namespace]
-            regex: default
-          - action: replace
-            source_labels: [__meta_kubernetes_pod_container_name,__meta_kubernetes_namespace,__meta_kubernetes_pod_name]
-            regex: (.+);(.+);(.+)
-            target_label: __path__
-            replacement: /var/log/containers/$3_$2_$1-*.log
           - action: labelmap
             regex: __meta_kubernetes_pod_label_(.+)
-        pipeline_stages:
-          - cri: {}
+
+      - job_name: kubernetes-logs
+        static_configs:
+          - targets: ['localhost']
+            labels:
+              job: kube-logs
+              __path__: /var/log/pods/*/*.log
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -79,36 +76,24 @@ data:
         ring:
           kvstore:
             store: inmemory
-          replication_factor: 1
-      chunk_idle_period: 5m
-      max_chunk_age: 1h
-      chunk_retain_period: 30s
+
+    storage_config:
+      boltdb:
+        directory: /loki/index
 
     schema_config:
       configs:
         - from: 2020-10-24
-          store: boltdb-shipper
+          store: boltdb
           object_store: filesystem
           schema: v11
           index:
             prefix: index_
             period: 24h
 
-    storage_config:
-      boltdb_shipper:
-        active_index_directory: /loki/index
-        cache_location: /loki/cache
-      filesystem:
-        directory: /loki/chunks
-
-    limits_config:
-      allow_structured_metadata: false
-      reject_old_samples: true
-      reject_old_samples_max_age: 168h
-
-    table_manager:
-      retention_deletes_enabled: true
-      retention_period: 168h
+    compactor:
+      working_directory: /loki/compactor
+      shared_store: filesystem
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -291,6 +276,22 @@ spec:
         app: promtail
     spec:
       serviceAccountName: promtail-sa
+      volumes:
+        - name: config
+          configMap:
+            name: promtail-config
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: containers
+          hostPath:
+            path: /var/log/containers
+        - name: pods
+          hostPath:
+            path: /var/log/pods
+            type: Directory
+        - name: positions
+          emptyDir: {}
       containers:
         - name: promtail
           image: grafana/promtail:3.1.1
@@ -305,16 +306,11 @@ spec:
             - name: containers
               mountPath: /var/log/containers
               readOnly: true
-      volumes:
-        - name: config
-          configMap:
-            name: promtail-config
-        - name: varlog
-          hostPath:
-            path: /var/log
-        - name: containers
-          hostPath:
-            path: /var/log/containers
+            - name: pods
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: positions
+              mountPath: /tmp
 ---
 apiVersion: v1
 kind: ServiceAccount
