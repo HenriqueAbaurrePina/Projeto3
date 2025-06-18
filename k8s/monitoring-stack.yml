@@ -29,7 +29,7 @@ data:
       filename: /tmp/positions.yaml
 
     clients:
-      - url: http://loki:3100/loki/api/v1/push
+      - url: http://loki.default.svc.cluster.local:3100/loki/api/v1/push
         backoff_config:
           min_period: 500ms
           max_period: 5s
@@ -70,7 +70,9 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: loki-config
+  name: loki
+  labels:
+    app: loki
   namespace: default
 data:
   local-config.yaml: |-
