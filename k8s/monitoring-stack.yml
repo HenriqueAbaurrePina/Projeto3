@@ -42,7 +42,7 @@ data:
           - targets: ['localhost']
             labels:
               job: kube-logs-containers
-              __path__: /var/log/containers/*.log
+              __path__: /var/log/containers/*_default_*.log
         pipeline_stages:
           - cri: {}
 
