@@ -24,6 +24,17 @@ data:
           regex: kube-state-metrics
       metrics_path: /metrics
       scheme: http
+      - job_name: 'node-exporter'
+      kubernetes_sd_configs:
+        - role: endpoints
+          namespaces:
+            names: ['monitoring']
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_service_name]
+          regex: node-exporter
+          action: keep
+      metrics_path: /metrics
+      scheme: http
 ---
 apiVersion: v1
 kind: ConfigMap
