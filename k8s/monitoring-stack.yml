@@ -43,8 +43,8 @@ data:
             labels:
               job: kube-logs-containers
               __path__: /var/log/containers/*_default_*.log
-        pipeline_stages:
-          - cri: {}
+        #pipeline_stages:
+        #  - cri: {}
 
       - job_name: kubernetes-pods
         kubernetes_sd_configs:
