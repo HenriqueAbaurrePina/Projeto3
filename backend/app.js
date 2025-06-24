@@ -11,7 +11,7 @@ const app = express();
 
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = ['http://20.201.101.224'];
+    const allowedOrigins = ['http://4.228.131.86'];
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -29,6 +29,11 @@ app.set('trust proxy', 1);
 mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('✅ Conectado ao MongoDB'))
 .catch((err) => console.error('❌ Erro ao conectar ao MongoDB:', err));
+
+// Middleware de métricas Prometheus
+const promBundle = require("express-prom-bundle");
+const metricsMiddleware = promBundle({ includeMethod: true });
+app.use(metricsMiddleware);
 
 // Middlewares de segurança
 app.use(helmet());
@@ -51,11 +56,6 @@ app.use(express.json());
 
 const logMiddleware = require('./middlewares/logMiddleware');
 app.use(logMiddleware);
-
-// Middleware de métricas Prometheus
-const promBundle = require("express-prom-bundle");
-const metricsMiddleware = promBundle({ includeMethod: true });
-app.use(metricsMiddleware);
 
 // Importa middlewares
 const verifyToken = require('./middlewares/authMiddleware');
