@@ -232,7 +232,7 @@ Esta parte apresenta de forma objetiva todas as **medidas de segurança ativamen
 
 ## 📈 9. Monitoramento e Alertas no Grafana
 
-- Acesse sua instância Grafana em http://<SEU-GRAFANA-URL>:3000 e faça login.
+- Acesse sua instância Grafana em http://SEU-GRAFANA-URL:3000 e faça login.
 
 ### 1. Criação dos Data Sources
 
