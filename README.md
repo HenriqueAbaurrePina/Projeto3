@@ -232,7 +232,7 @@ Esta parte apresenta de forma objetiva todas as **medidas de segurança ativamen
 
 ## 📈 9. Monitoramento e Alertas no Grafana
 
-- Acesse sua instância Grafana em http://SEU-GRAFANA-URL:3000 e faça login.
+- Acesse sua instância Grafana em `http://SEU-GRAFANA-URL:3000` e faça login.
 
 ### 1. Criação dos Data Sources
 
@@ -243,14 +243,14 @@ A seguir estão as instruções para criar e usar os data sources no Grafana
 - clique em add new data source
 
 - selecione o prometheus, e no Connection coloque:
-  "http://prometheus:9090"
+  `http://prometheus:9090`
 
 - Clique em Save & test
 
 - clique em add new data source
 
 - selecione o loki, e no Connection coloque:
-  "http://loki:3100"
+  `http://loki:3100`
 
 - Clique em Save & test
 
