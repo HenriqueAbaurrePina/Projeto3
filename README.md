@@ -234,7 +234,7 @@ Esta parte apresenta de forma objetiva todas as **medidas de segurança ativamen
 
 - Acesse sua instância Grafana em http://<SEU-GRAFANA-URL>:3000 e faça login.
 
-1. **Criação dos Data Sources**
+### 1. Criação dos Data Sources
 
 A seguir estão as instruções para criar e usar os data sources no Grafana
 
@@ -255,7 +255,7 @@ A seguir estão as instruções para criar e usar os data sources no Grafana
 - Clique em Save & test
 
 
-1. **Criação dos Dashboards**
+### 2. Criação dos Dashboards
 
 A seguir estão as instruções para criar e usar os recursos de visualização no Grafana
 
@@ -273,55 +273,55 @@ A seguir estão as instruções para criar e usar os recursos de visualização 
 
 - Ao importa, deve atualizar manualmente as views de cada dashboard, para que elas sejam referenciadas corretamente, só é preciso clicar no refresh na pagina de edição de cada uma.
 
-2. **Criação dos Alertas**
+### 3. Criação dos Alertas
 
 A seguir estão as instruções para criar os alerta no Grafana
 
 - Navegue em Alerting → Alert Rules → New alert rule.
 
-  - Primeiro Alerta (Backend OFF)
-    - Coloque o nome do alerta
+  - **Primeiro Alerta (Backend OFF)**
+      - Coloque o nome do alerta
 
-    - Codigo para o alerta:
+      - Codigo para o alerta:
 
-      ```YAML
-      count(kube_pod_status_phase{namespace="default",pod=~"backend-.*",phase="Running"})
-      ```
+        ```YAML
+        count(kube_pod_status_phase{namespace="default",pod=~"backend-.*",phase="Running"})
+        ```
 
-    - Condition: WHEN QUERY IS BELOW 1
+      - Condition: WHEN QUERY IS BELOW 1
 
-    - Adicione ou crie um folder
+      - Adicione ou crie um folder
 
-    - Adicione ou crie um evaluation group 
+      - Adicione ou crie um evaluation group 
 
-    - Vá em "Configure no data and error handling" e onde estiver No Data, selecione Alerting.
+      - Vá em "Configure no data and error handling" e onde estiver No Data, selecione Alerting.
 
-    - Configure as notificações 
+      - Configure as notificações 
 
-    - Configure as mensagens de notificações
+      - Configure as mensagens de notificações
 
-    - Por fim salve.
+      - Por fim salve.
 
-  - Segundo Alerta (Erros HTTP)
-    - Coloque o nome do alerta
+  - **Segundo Alerta (Erros HTTP)**
+      - Coloque o nome do alerta
 
-    - Codigo para o alerta:
+      - Codigo para o alerta:
 
-      ```YAML
-      sum by (status_code) (increase(http_request_duration_seconds_count{job="backend", status_code=~"4..|5.."}[1m]))
-      ```
-    - Condition: WHEN QUERY IS ABOVE 0
+        ```YAML
+        sum by (status_code) (increase(http_request_duration_seconds_count{job="backend", status_code=~"4..|5.."}[1m]))
+        ```
+      - Condition: WHEN QUERY IS ABOVE 0
 
-    - Adicione ou crie um folder
+      - Adicione ou crie um folder
 
-    - Adicione ou crie um evaluation group 
+      - Adicione ou crie um evaluation group 
 
-    - Configure as notificações 
+      - Configure as notificações 
 
-    - Configure as mensagens de notificações
+      - Configure as mensagens de notificações
 
-    - Clique em "Link dashboard and panel"
+      - Clique em "Link dashboard and panel"
 
-    - Selecione o dashboard e o painel que queira linkar (No caso seria: Dashboard de Aplicação → Erros HTTP)
+      - Selecione o dashboard e o painel que queira linkar (No caso seria: Dashboard de Aplicação → Erros HTTP)
 
-    - Por fim salve.
+      - Por fim salve.
