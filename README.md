@@ -230,3 +230,95 @@ Esta parte apresenta de forma objetiva todas as **medidas de segurança ativamen
   - CORS simplificado.
   - Isolamento entre frontend e API.
 
+## 📈 9. Monitoramento e Alertas no Grafana
+
+- Acesse sua instância Grafana em http://<SEU-GRAFANA-URL>:3000 e faça login.
+
+1. **Criação dos Data Sources**
+
+A seguir estão as instruções para criar e usar os data sources no Grafana
+
+- Acesse a aba connections → Data sources
+
+- clique em add new data source
+
+- selecione o prometheus, e no Connection coloque:
+  "http://prometheus:9090"
+
+- Clique em Save & test
+
+- clique em add new data source
+
+- selecione o loki, e no Connection coloque:
+  "http://loki:3100"
+
+- Clique em Save & test
+
+
+1. **Criação dos Dashboards**
+
+A seguir estão as instruções para criar e usar os recursos de visualização no Grafana
+
+- Acesse a aba de Dashboards
+
+- Clique em New → Import.
+
+- Faça o upload do arquivo JSON que deseja, da pasta Grafana json no diretório do projeto:
+
+ 1. Dashboard-app-model.json
+
+ 2. Dashboard-infra-model.json
+
+- Clique em Import.
+
+- Ao importa, deve atualizar manualmente as views de cada dashboard, para que elas sejam referenciadas corretamente, só é preciso clicar no refresh na pagina de edição de cada uma.
+
+2. **Criação dos Alertas**
+
+A seguir estão as instruções para criar os alerta no Grafana
+
+- Navegue em Alerting → Alert Rules → New alert rule.
+
+  1. Primeiro Alerta (Backend OFF)
+    - Coloque o nome do alerta
+
+    - Codigo para o alerta:
+
+      count(kube_pod_status_phase{namespace="default",pod=~"backend-.*",phase="Running"})
+
+    - Condition: WHEN QUERY IS BELOW 1
+
+    - Adicione ou crie um folder
+
+    - Adicione ou crie um evaluation group 
+
+    - Vá em "Configure no data and error handling" e onde estiver No Data, selecione Alerting.
+
+    - Configure as notificações 
+
+    - Configure as mensagens de notificações
+
+    - Por fim salve.
+
+  2. Segundo Alerta (Erros HTTP)
+    - Coloque o nome do alerta
+
+    - Codigo para o alerta:
+
+      sum by (status_code) (increase(http_request_duration_seconds_count{job="backend", status_code=~"4..|5.."}[1m]))
+    
+    - Condition: WHEN QUERY IS ABOVE 0
+
+    - Adicione ou crie um folder
+
+    - Adicione ou crie um evaluation group 
+
+    - Configure as notificações 
+
+    - Configure as mensagens de notificações
+
+    - Clique em "Link dashboard and panel"
+
+    - Selecione o dashboard e o painel que queira linkar (No caso seria: Dashboard de Aplicação → Erros HTTP)
+
+    - Por fim salve.
