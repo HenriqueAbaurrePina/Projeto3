@@ -284,7 +284,9 @@ A seguir estão as instruções para criar os alerta no Grafana
 
     - Codigo para o alerta:
 
+      ```YAML
       count(kube_pod_status_phase{namespace="default",pod=~"backend-.*",phase="Running"})
+      ```
 
     - Condition: WHEN QUERY IS BELOW 1
 
@@ -305,8 +307,9 @@ A seguir estão as instruções para criar os alerta no Grafana
 
     - Codigo para o alerta:
 
+      ```YAML
       sum by (status_code) (increase(http_request_duration_seconds_count{job="backend", status_code=~"4..|5.."}[1m]))
-    
+      ```
     - Condition: WHEN QUERY IS ABOVE 0
 
     - Adicione ou crie um folder
