@@ -265,9 +265,9 @@ A seguir estão as instruções para criar e usar os recursos de visualização 
 
 - Faça o upload do arquivo JSON que deseja, da pasta Grafana json no diretório do projeto:
 
- 1. Dashboard-app-model.json
+ - Dashboard-app-model.json
 
- 2. Dashboard-infra-model.json
+ - Dashboard-infra-model.json
 
 - Clique em Import.
 
@@ -279,7 +279,7 @@ A seguir estão as instruções para criar os alerta no Grafana
 
 - Navegue em Alerting → Alert Rules → New alert rule.
 
-  1. Primeiro Alerta (Backend OFF)
+  - Primeiro Alerta (Backend OFF)
     - Coloque o nome do alerta
 
     - Codigo para o alerta:
@@ -302,7 +302,7 @@ A seguir estão as instruções para criar os alerta no Grafana
 
     - Por fim salve.
 
-  2. Segundo Alerta (Erros HTTP)
+  - Segundo Alerta (Erros HTTP)
     - Coloque o nome do alerta
 
     - Codigo para o alerta:
